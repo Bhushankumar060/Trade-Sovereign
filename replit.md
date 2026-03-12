@@ -1,8 +1,8 @@
-# Workspace
+# Trade Sovereign — Enterprise E-Commerce & Trading Platform
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+A production-ready enterprise marketplace and trading platform combining real-time market analytics, AI-powered insights, and a premium digital marketplace.
 
 ## Stack
 
@@ -10,8 +10,13 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
+- **Frontend**: React + Vite (Tailwind CSS, Framer Motion, shadcn/ui, wouter routing)
 - **API framework**: Express 5
 - **Database**: PostgreSQL + Drizzle ORM
+- **Auth**: Firebase Auth (client-side) + Firebase Admin SDK (server-side token verification)
+- **Payments**: Razorpay (order creation + server-side signature verification)
+- **AI**: Google Gemini 1.5 Flash (market analysis + smart product search)
+- **Charts**: TradingView Lightweight Charts widget (embedded via iframe)
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -20,77 +25,89 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ```text
 artifacts-monorepo/
-├── artifacts/              # Deployable applications
-│   └── api-server/         # Express API server
-├── lib/                    # Shared libraries
-│   ├── api-spec/           # OpenAPI spec + Orval codegen config
+├── artifacts/
+│   ├── api-server/         # Express API server
+│   │   ├── src/
+│   │   │   ├── lib/        # firebase-admin.ts
+│   │   │   ├── middlewares/ # auth.ts (authenticate, requireAdmin)
+│   │   │   └── routes/     # auth, products, media, orders, payments, subscriptions, rewards, ai, admin
+│   └── trade-sovereign/    # React + Vite frontend (previewPath: /)
+│       ├── src/
+│       │   ├── contexts/   # AuthContext, CartContext
+│       │   ├── lib/        # firebase.ts, fetch-interceptor.ts
+│       │   ├── pages/      # Home, Marketplace, MediaStore, Dashboard, Subscriptions, Orders, Rewards, Admin, Login, Register
+│       │   └── components/ # Navbar, CartDrawer, AppLayout, design-system
+│       └── public/images/  # AI-generated hero, logo, ai-bg images
+├── lib/
+│   ├── api-spec/           # OpenAPI 3.1 spec (comprehensive)
 │   ├── api-client-react/   # Generated React Query hooks
-│   ├── api-zod/            # Generated Zod schemas from OpenAPI
+│   ├── api-zod/            # Generated Zod schemas
 │   └── db/                 # Drizzle ORM schema + DB connection
-├── scripts/                # Utility scripts (single workspace package)
-│   └── src/                # Individual .ts scripts, run via `pnpm --filter @workspace/scripts run <script>`
-├── pnpm-workspace.yaml     # pnpm workspace (artifacts/*, lib/*, lib/integrations/*, scripts)
-├── tsconfig.base.json      # Shared TS options (composite, bundler resolution, es2022)
-├── tsconfig.json           # Root TS project references
-└── package.json            # Root package with hoisted devDeps
+│       └── src/schema/     # users, products, media, orders, subscriptions, rewards
+├── scripts/
+│   └── src/seed.ts         # Demo data seeder (run: pnpm --filter @workspace/scripts run seed)
+├── pnpm-workspace.yaml
+├── tsconfig.base.json
+├── tsconfig.json
+└── package.json
 ```
 
-## TypeScript & Composite Projects
+## Required Environment Variables
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references. This means:
+### Secrets (set via Replit Secrets)
+- `DATABASE_URL` — PostgreSQL connection string (auto-provisioned by Replit)
+- `RAZORPAY_KEY_ID` — Razorpay public key (rzp_*)
+- `RAZORPAY_KEY_SECRET` — Razorpay secret key
+- `GEMINI_API_KEY` — Google Gemini API key
+- `FIREBASE_PROJECT_ID` — Firebase project ID (server-side Admin SDK)
+- `VITE_FIREBASE_API_KEY` — Firebase web API key (client-side)
+- `VITE_FIREBASE_AUTH_DOMAIN` — Firebase auth domain (client-side)
+- `VITE_FIREBASE_PROJECT_ID` — Firebase project ID (client-side)
+- `VITE_FIREBASE_APP_ID` — Firebase app ID (client-side)
 
-- **Always typecheck from the root** — run `pnpm run typecheck` (which runs `tsc --build --emitDeclarationOnly`). This builds the full dependency graph so that cross-package imports resolve correctly. Running `tsc` inside a single package will fail if its dependencies haven't been built yet.
-- **`emitDeclarationOnly`** — we only emit `.d.ts` files during typecheck; actual JS bundling is handled by esbuild/tsx/vite...etc, not `tsc`.
-- **Project references** — when package A depends on package B, A's `tsconfig.json` must list B in its `references` array. `tsc --build` uses this to determine build order and skip up-to-date packages.
+## Features
 
-## Root Scripts
+1. **Marketplace** — Browse 12 digital trading products with AI smart search, category filters, cart
+2. **Media Store** — Music/movie catalog with purchase-gated download links
+3. **Dashboard** — TradingView chart widget + Trade Sovereign AI analysis panel
+4. **Subscriptions** — Free/Pro ($9.99)/Elite ($24.99) plans with Razorpay checkout
+5. **Orders** — Full order history with status tracking
+6. **Rewards** — Loyalty points earned on purchases (10pts per ₹), Bronze/Silver/Gold/Platinum tiers
+7. **Admin Panel** — Protected by role=admin. Stats, CRUD for products/media, user management
+8. **Auth** — Firebase email/password + Google Sign-in. ID tokens sent as Bearer headers
+9. **AI** — Gemini-powered market trend analysis + natural language product search (rate limited)
 
-- `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
-- `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
+## Security
 
-## Packages
+- **Payment verification**: Server-side Razorpay HMAC-SHA256 signature verification before marking orders paid
+- **Auth middleware**: Firebase ID token verification on all protected routes
+- **Admin protection**: Role check in Firestore user document (`requireAdmin` middleware)
+- **Input sanitization**: All Gemini inputs stripped of HTML tags, max 1000 chars
+- **Rate limiting**: 20 AI requests per user per hour (in-memory)
+- **Security headers**: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- **No sensitive data stored**: Razorpay handles all payment card data
 
-### `artifacts/api-server` (`@workspace/api-server`)
+## Development Commands
 
-Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` for request and response validation and `@workspace/db` for persistence.
+```bash
+# Run full dev environment (all workflows)
+# Each workflow starts automatically
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
-- App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
-- Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
-- Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
-- Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
+# Seed demo data
+pnpm --filter @workspace/scripts run seed
 
-### `lib/db` (`@workspace/db`)
+# Push DB schema changes
+pnpm --filter @workspace/db run push
 
-Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.
+# Regenerate API client from OpenAPI spec
+pnpm --filter @workspace/api-spec run codegen
+```
 
-- `src/index.ts` — creates a `Pool` + Drizzle instance, exports schema
-- `src/schema/index.ts` — barrel re-export of all models
-- `src/schema/<modelname>.ts` — table definitions with `drizzle-zod` insert schemas (no models definitions exist right now)
-- `drizzle.config.ts` — Drizzle Kit config (requires `DATABASE_URL`, automatically provided by Replit)
-- Exports: `.` (pool, db, schema), `./schema` (schema only)
+## Database Schema
 
-Production migrations are handled by Replit when publishing. In development, we just use `pnpm --filter @workspace/db run push`, and we fallback to `pnpm --filter @workspace/db run push-force`.
-
-### `lib/api-spec` (`@workspace/api-spec`)
-
-Owns the OpenAPI 3.1 spec (`openapi.yaml`) and the Orval config (`orval.config.ts`). Running codegen produces output into two sibling packages:
-
-1. `lib/api-client-react/src/generated/` — React Query hooks + fetch client
-2. `lib/api-zod/src/generated/` — Zod schemas
-
-Run codegen: `pnpm --filter @workspace/api-spec run codegen`
-
-### `lib/api-zod` (`@workspace/api-zod`)
-
-Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used by `api-server` for response validation.
-
-### `lib/api-client-react` (`@workspace/api-client-react`)
-
-Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
-
-### `scripts` (`@workspace/scripts`)
-
-Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+- `users` — id (Firebase UID), email, displayName, role, loyaltyPoints
+- `products` — id, name, description, price, category, stock, imageUrl, isDigital
+- `media` — id, title, type (music/movie), price, description, imageUrl, fileUrl, licenseType
+- `orders` — id, userId, razorpayOrderId, razorpayPaymentId, status, total, items (JSONB)
+- `subscriptions` — id, userId, planType, status, expiresAt
+- `rewards` — id, userId, points, type, description

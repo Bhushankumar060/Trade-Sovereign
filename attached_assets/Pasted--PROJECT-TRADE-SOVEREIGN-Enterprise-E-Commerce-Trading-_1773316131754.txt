@@ -1,0 +1,81 @@
+# PROJECT: TRADE SOVEREIGN (Enterprise E-Commerce & Trading Platform)
+# ROLE: Senior Full-Stack Developer, Cybersecurity Architect, AI Engineer
+# GOAL: Build a production-ready, secure marketplace using Firebase, Razorpay, and Google Gemini.
+# DESIGN AESTHETIC: Lovable.dev / Emergent (Modern, Glassmorphism, Dark Mode, Smooth Animations).
+
+## 1. TECH STACK REQUIREMENTS
+- **Framework:** Next.js 14 (App Router) with TypeScript.
+- **Styling:** Tailwind CSS + Framer Motion + Shadcn/UI.
+- **Backend & Auth:** Firebase (Auth, Firestore, Storage) + Firebase Admin SDK.
+- **Payments:** Razorpay (Checkout, Subscriptions, Webhooks).
+- **AI Integration:** Google Gemini API (for Trading Insights & Product Search).
+- **Trading:** TradingView Lightweight Charts Widget.
+- **Security:** Firebase Security Rules, Razorpay Signature Verification, CSP Headers.
+
+## 2. CYBERSECURITY PROTOCOLS (MANDATORY)
+- **Firebase Security:** Implement strict Firestore Security Rules. Users can only read their own data. Admins can write.
+- **Payment Security:** Verify Razorpay payment signatures on the server-side API route before confirming order status.
+- **AI Security:** Sanitize all inputs sent to Gemini API. Rate limit AI requests to prevent abuse.
+- **Authentication:** Use Firebase Auth with Email/Password + Google Sign-in. Implement MFA for Admin accounts.
+- **Data Privacy:** Encrypt sensitive user data in Firestore. Do not store payment details (Razorpay handles this).
+- **Bot Protection:** Implement Cloudflare Turnstile on login and checkout forms.
+
+## 3. DATABASE SCHEMA (Firebase Firestore)
+Structure collections as follows:
+- `users`: (uid, email, role [user/admin], loyalty_points, created_at)
+- `products`: (id, name, price, category, stock, image_url, is_digital)
+- `media`: (id, title, type [music/movie], price, file_url, license_type)
+- `orders`: (id, user_id, razorpay_order_id, status, total, created_at)
+- `subscriptions`: (id, user_id, plan_type, status, expires_at)
+- `rewards`: (id, user_id, points, type, description)
+- `trading_analytics`: (id, user_id, symbol, data_json)
+
+## 4. CORE FEATURES TO IMPLEMENT
+1.  **Marketplace:** Browse products, filter by category.
+2.  **Media Store:** Secure download links for Music/Movies after payment verification.
+3.  **TradingView Integration:** Embed real-time charts in the dashboard.
+4.  **Admin Panel:**
+    - Add/Edit/Delete Products.
+    - Upload Media (Music/Movies) to Firebase Storage.
+    - Manage Subscriptions.
+    - View User Analytics.
+5.  **Subscription System:** Monthly/Yearly tiers (Free, Pro, Elite) with Razorpay Checkout.
+6.  **AI Features (Gemini):**
+    - "Trade Sovereign AI": Analyze market trends based on user input.
+    - "Smart Search": Use Gemini to understand natural language product queries.
+7.  **Rewards System:** Logic to award points on purchase completion.
+
+## 5. IMPLEMENTATION STEPS (EXECUTE IN ORDER)
+1.  **Initialize Project:** Set up Next.js 14, Tailwind, and Firebase SDK.
+2.  **Security Setup:** Configure `.env.local` with Firebase & Razorpay keys. Add Security Headers middleware.
+3.  **Firebase Config:** Initialize Firebase App, Auth, Firestore, and Storage.
+4.  **Auth:** Build Login/Signup pages with Firebase Auth.
+5.  **UI Components:** Build the Navbar, Footer, and Product Card with Framer Motion.
+6.  **TradingView:** Integrate the TradingView widget into the Dashboard.
+7.  **Admin Panel:** Create a protected route `/admin` accessible only by 'admin' role (check Firestore).
+8.  **Payments:** Integrate Razorpay Checkout for products and subscriptions.
+    - **CRITICAL:** Create an API route `/api/create-order` to generate Razorpay order.
+    - **CRITICAL:** Create an API route `/api/verify-payment` to verify signature and update Firestore.
+9.  **AI Integration:** Create an API route `/api/ai-analyze` to call Google Gemini securely.
+10. **Debugging:** Add global error boundaries and console logging for debugging.
+
+## 6. DEBUGGING & FIXING INSTRUCTIONS
+- **If Firebase Auth Fails:** Check `firebaseConfig` in `.env`. Ensure CORS is allowed in Firebase Console.
+- **If Razorpay Payment Fails:** Check `razorpay_key_id` and `razorpay_key_secret`. Verify Webhook URL in Razorpay Dashboard.
+- **If Gemini API Fails:** Check API Key validity. Ensure the server route is protected.
+- **If Security Rules Block:** Check Firestore Security Rules. Ensure `request.auth.uid == resource.data.uid` for user data.
+- **General:** If any error occurs, log it to the console and display a user-friendly message, do not expose stack traces.
+
+## 7. API REQUIREMENTS & KEYS
+- **Firebase:** `FIREBASE_API_KEY`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_PROJECT_ID`, `FIREBASE_STORAGE_BUCKET`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_APP_ID`
+- **Razorpay:** `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
+- **Google Gemini:** `GEMINI_API_KEY`
+- **TradingView:** (No key needed for basic widget)
+
+## 8. FINAL DELIVERABLE
+- A fully functional Next.js application structure.
+- All necessary components, pages, and API routes.
+- A `README.md` with setup instructions.
+- A `SECURITY.md` outlining the security measures taken.
+
+**START BUILDING NOW. PRIORITIZE SECURITY AND UI QUALITY. DO NOT USE MOCK DATA FOR PRODUCTION ROUTES.**

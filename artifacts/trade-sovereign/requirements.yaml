@@ -1,0 +1,27 @@
+packages:
+  "firebase": "Client-side authentication"
+  "framer-motion": "Stunning page transitions and micro-interactions"
+  "lucide-react": "Beautiful consistent iconography"
+  "date-fns": "Date formatting for orders and rewards"
+  "react-hook-form": "Form state management"
+  "@hookform/resolvers": "Zod validation integration"
+  "zod": "Schema validation"
+  "recharts": "Dashboard analytics charts for admin panel"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility for merging tailwind classes without style conflicts"
+
+images:
+  - path: "artifacts/trade-sovereign/public/images/hero-bg.png"
+    description: "Abstract ultra-premium dark glassmorphism gradient mesh background in deep navy and vibrant cyan with subtle glowing light leaks and geometric grid lines"
+    aspect_ratio: "16:9"
+  - path: "artifacts/trade-sovereign/public/images/logo.png"
+    description: "Minimalist futuristic geometric logo mark for an enterprise trading platform in electric cyan on a transparent background"
+    aspect_ratio: "1:1"
+  - path: "artifacts/trade-sovereign/public/images/ai-bg.png"
+    description: "Dark high-tech background with glowing cyan data nodes, neural network connections, and trading candlestick abstract representations"
+    aspect_ratio: "16:9"
+
+notes:
+  - Frontend uses Firebase Auth. The ID token is injected into all /api requests via a fetch interceptor.
+  - Razorpay checkout script is loaded dynamically when a user clicks checkout.
+  - TradingView is embedded using their advanced widget iframe.

@@ -1,22 +1,39 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Trade Sovereign API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: products
+    description: Product catalog operations
+  - name: media
+    description: Media store operations
+  - name: orders
+    description: Order management operations
+  - name: subscriptions
+    description: Subscription management
+  - name: rewards
+    description: Rewards/loyalty system
+  - name: admin
+    description: Admin panel operations
+  - name: ai
+    description: AI-powered features
+  - name: payments
+    description: Payment processing
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,7 +41,489 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/profile:
+    put:
+      operationId: updateProfile
+      tags: [auth]
+      summary: Update user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /media:
+    get:
+      operationId: listMedia
+      tags: [media]
+      summary: List media items
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [music, movie]
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Media list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaListResponse"
+
+  /media/{id}:
+    get:
+      operationId: getMediaItem
+      tags: [media]
+      summary: Get media item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Media item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+
+  /media/{id}/download:
+    get:
+      operationId: getMediaDownloadUrl
+      tags: [media]
+      summary: Get secure download URL for purchased media
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Download URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DownloadUrlResponse"
+        "403":
+          description: Not purchased
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List user orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Order list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderListResponse"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /payments/create-order:
+    post:
+      operationId: createPaymentOrder
+      tags: [payments]
+      summary: Create Razorpay payment order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "200":
+          description: Razorpay order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RazorpayOrderResponse"
+
+  /payments/verify:
+    post:
+      operationId: verifyPayment
+      tags: [payments]
+      summary: Verify Razorpay payment signature
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyPaymentRequest"
+      responses:
+        "200":
+          description: Payment verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyPaymentResponse"
+
+  /subscriptions/my:
+    get:
+      operationId: getMySubscription
+      tags: [subscriptions]
+      summary: Get current user subscription
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current subscription
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+
+  /subscriptions/plans:
+    get:
+      operationId: listSubscriptionPlans
+      tags: [subscriptions]
+      summary: List subscription plans
+      responses:
+        "200":
+          description: Plans list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionPlansResponse"
+
+  /rewards/my:
+    get:
+      operationId: getMyRewards
+      tags: [rewards]
+      summary: Get current user rewards
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User rewards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardsResponse"
+
+  /ai/analyze:
+    post:
+      operationId: aiAnalyze
+      tags: [ai]
+      summary: AI market trend analysis
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiAnalyzeRequest"
+      responses:
+        "200":
+          description: AI analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiAnalyzeResponse"
+
+  /ai/search:
+    post:
+      operationId: aiSearch
+      tags: [ai]
+      summary: AI-powered natural language product search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiSearchRequest"
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSearchResponse"
+
+  /admin/products:
+    get:
+      operationId: adminListProducts
+      tags: [admin]
+      summary: Admin list all products
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+    post:
+      operationId: adminCreateProduct
+      tags: [admin]
+      summary: Create product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /admin/products/{id}:
+    put:
+      operationId: adminUpdateProduct
+      tags: [admin]
+      summary: Update product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: adminDeleteProduct
+      tags: [admin]
+      summary: Delete product
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/media:
+    get:
+      operationId: adminListMedia
+      tags: [admin]
+      summary: Admin list all media
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Media list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaListResponse"
+    post:
+      operationId: adminCreateMedia
+      tags: [admin]
+      summary: Create media item
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMediaRequest"
+      responses:
+        "201":
+          description: Media item created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      tags: [admin]
+      summary: Admin list all users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Admin dashboard stats
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +533,550 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+        loyaltyPoints:
+          type: number
+        createdAt:
+          type: string
+      required:
+        - id
+        - email
+        - role
+        - loyaltyPoints
+        - createdAt
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+
+    UserListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: number
+      required:
+        - users
+        - total
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        stock:
+          type: number
+        imageUrl:
+          type: string
+        isDigital:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - price
+        - category
+        - stock
+        - isDigital
+        - createdAt
+
+    ProductListResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required:
+        - products
+        - total
+
+    CreateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        stock:
+          type: number
+        imageUrl:
+          type: string
+        isDigital:
+          type: boolean
+      required:
+        - name
+        - price
+        - category
+        - stock
+        - isDigital
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        stock:
+          type: number
+        imageUrl:
+          type: string
+        isDigital:
+          type: boolean
+
+    MediaItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+          enum: [music, movie]
+        price:
+          type: number
+        description:
+          type: string
+        imageUrl:
+          type: string
+        fileUrl:
+          type: string
+        licenseType:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - type
+        - price
+        - licenseType
+        - createdAt
+
+    MediaListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MediaItem"
+        total:
+          type: number
+        page:
+          type: number
+        limit:
+          type: number
+      required:
+        - items
+        - total
+
+    CreateMediaRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum: [music, movie]
+        price:
+          type: number
+        description:
+          type: string
+        imageUrl:
+          type: string
+        fileUrl:
+          type: string
+        licenseType:
+          type: string
+      required:
+        - title
+        - type
+        - price
+        - licenseType
+
+    DownloadUrlResponse:
+      type: object
+      properties:
+        url:
+          type: string
+        expiresAt:
+          type: string
+      required:
+        - url
+        - expiresAt
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        razorpayOrderId:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid, failed, refunded]
+        total:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        createdAt:
+          type: string
+      required:
+        - id
+        - userId
+        - status
+        - total
+        - createdAt
+
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        mediaId:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: number
+      required:
+        - id
+        - price
+        - quantity
+
+    OrderListResponse:
+      type: object
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+        total:
+          type: number
+      required:
+        - orders
+        - total
+
+    CreateOrderRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        type:
+          type: string
+          enum: [product, media, subscription]
+        subscriptionPlan:
+          type: string
+      required:
+        - items
+        - type
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+        quantity:
+          type: number
+        type:
+          type: string
+          enum: [product, media]
+      required:
+        - id
+        - quantity
+        - type
+
+    RazorpayOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+        razorpayOrderId:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        keyId:
+          type: string
+      required:
+        - orderId
+        - razorpayOrderId
+        - amount
+        - currency
+        - keyId
+
+    VerifyPaymentRequest:
+      type: object
+      properties:
+        orderId:
+          type: string
+        razorpayOrderId:
+          type: string
+        razorpayPaymentId:
+          type: string
+        razorpaySignature:
+          type: string
+      required:
+        - orderId
+        - razorpayOrderId
+        - razorpayPaymentId
+        - razorpaySignature
+
+    VerifyPaymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        orderId:
+          type: string
+        message:
+          type: string
+      required:
+        - success
+        - orderId
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        planType:
+          type: string
+          enum: [free, pro, elite]
+        status:
+          type: string
+          enum: [active, cancelled, expired]
+        expiresAt:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - userId
+        - planType
+        - status
+        - createdAt
+
+    SubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        yearlyPrice:
+          type: number
+        features:
+          type: array
+          items:
+            type: string
+        isPopular:
+          type: boolean
+      required:
+        - id
+        - name
+        - price
+        - yearlyPrice
+        - features
+        - isPopular
+
+    SubscriptionPlansResponse:
+      type: object
+      properties:
+        plans:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubscriptionPlan"
+      required:
+        - plans
+
+    RewardsResponse:
+      type: object
+      properties:
+        totalPoints:
+          type: number
+        tier:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/RewardEntry"
+      required:
+        - totalPoints
+        - tier
+        - history
+
+    RewardEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        points:
+          type: number
+        type:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - points
+        - type
+        - description
+        - createdAt
+
+    AiAnalyzeRequest:
+      type: object
+      properties:
+        query:
+          type: string
+        symbol:
+          type: string
+      required:
+        - query
+
+    AiAnalyzeResponse:
+      type: object
+      properties:
+        analysis:
+          type: string
+        sentiment:
+          type: string
+          enum: [bullish, bearish, neutral]
+        keyPoints:
+          type: array
+          items:
+            type: string
+        disclaimer:
+          type: string
+      required:
+        - analysis
+        - sentiment
+        - keyPoints
+        - disclaimer
+
+    AiSearchRequest:
+      type: object
+      properties:
+        query:
+          type: string
+      required:
+        - query
+
+    AiSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        interpretation:
+          type: string
+      required:
+        - results
+        - interpretation
+
+    AdminStats:
+      type: object
+      properties:
+        totalUsers:
+          type: number
+        totalOrders:
+          type: number
+        totalRevenue:
+          type: number
+        totalProducts:
+          type: number
+        totalMediaItems:
+          type: number
+        activeSubscriptions:
+          type: number
+        recentOrders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+      required:
+        - totalUsers
+        - totalOrders
+        - totalRevenue
+        - totalProducts
+        - totalMediaItems
+        - activeSubscriptions
+        - recentOrders

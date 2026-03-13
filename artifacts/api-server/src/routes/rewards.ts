@@ -1,6 +1,6 @@
-import { Router, IRouter, Response } from "express";
+import { Router, IRouter, Request, Response } from "express";
 import { db, rewardsTable, usersTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { authenticate, AuthRequest } from "../middlewares/auth.js";
 
 const router: IRouter = Router();
@@ -37,6 +37,33 @@ router.get("/my", authenticate, async (req: AuthRequest, res: Response): Promise
   } catch (err) {
     console.error("Get rewards error:", err);
     res.status(500).json({ error: "Internal server error", message: "Failed to get rewards" });
+  }
+});
+
+router.get("/leaderboard", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const users = await db
+      .select({
+        id: usersTable.id,
+        displayName: usersTable.displayName,
+        email: usersTable.email,
+        loyaltyPoints: usersTable.loyaltyPoints,
+      })
+      .from(usersTable)
+      .orderBy(desc(usersTable.loyaltyPoints))
+      .limit(20);
+
+    res.json({
+      leaderboard: users.map((u, i) => ({
+        rank: i + 1,
+        displayName: u.displayName || u.email.split("@")[0],
+        loyaltyPoints: u.loyaltyPoints ?? 0,
+        tier: getTier(u.loyaltyPoints ?? 0),
+      })),
+    });
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ error: "Internal server error", message: "Failed to get leaderboard" });
   }
 });
 

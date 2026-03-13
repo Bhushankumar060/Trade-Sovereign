@@ -45,6 +45,21 @@ async function getGeminiModel(modelOverride?: string): Promise<{ model: ReturnTy
   return { model: genAI.getGenerativeModel({ model: modelName }), promptTemplate };
 }
 
+/* ── Public AI Settings (model info only, no keys) ── */
+router.get("/settings", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const settings = await db.select().from(aiSettingsTable).limit(1);
+    const s = settings[0];
+    res.json({
+      modelName: s?.modelName ?? "gemini-1.5-flash",
+      hasCustomKey: !!(s?.apiKey),
+      rateLimit: RATE_LIMIT,
+    });
+  } catch {
+    res.json({ modelName: "gemini-1.5-flash", hasCustomKey: false, rateLimit: RATE_LIMIT });
+  }
+});
+
 /* ── Market Analysis ── */
 router.post("/analyze", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {

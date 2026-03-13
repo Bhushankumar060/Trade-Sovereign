@@ -4,3 +4,8 @@ export * from "./media";
 export * from "./orders";
 export * from "./subscriptions";
 export * from "./rewards";
+export * from "./categories";
+export * from "./pages";
+export * from "./ai_settings";
+export * from "./conversations";
+export * from "./subscription_plans";

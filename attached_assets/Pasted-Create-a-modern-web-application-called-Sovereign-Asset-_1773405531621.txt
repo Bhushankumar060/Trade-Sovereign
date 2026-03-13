@@ -1,0 +1,142 @@
+Create a modern web application called Sovereign Asset Exchange (or "Trade Sovereign") – a marketplace and AI-powered toolkit for traders. The platform lets users browse, purchase, and subscribe to digital trading assets (hardware, software, data feeds, analytics, crypto signals, etc.) while using an integrated AI assistant for strategy creation, market analysis, and personalized recommendations. The app must include a powerful admin panel that gives the owner (me) exclusive, unrestricted ability to add, modify, or remove any content, features, or pricing at any time without touching code.
+
+Core Features
+1. User Authentication & Roles
+Sign Up / Sign In (email/password, optional OAuth via Google/GitHub).
+
+Two roles:
+
+Trader: Browse, purchase, subscribe, use AI features.
+
+Admin (only you): Full CRUD over all content, users, settings. Only one admin account – hardcoded or via environment variable.
+
+JWT-based session management, protected routes.
+
+2. Marketplace & Product Cards
+Display products as responsive cards with:
+
+Image (uploaded by admin)
+
+Category badge (e.g., Hardware, Software, Data Feeds, Trading Tools, Analytics, Crypto)
+
+Price (with optional sale price)
+
+"Digital" tag (if applicable)
+
+Short description
+
+"Buy Now" or "Subscribe" button
+
+Categories are dynamic (admin can add/edit/delete).
+
+Products can be one-time purchase or subscription-based.
+
+Pagination and filtering by category, price, tags.
+
+3. Subscriptions & Media Store
+Subscriptions Page: List subscription plans (monthly/yearly) with features, prices (like $299.99, $149.99, etc.). Users subscribe via Stripe/PayPal.
+
+Media Store: Digital downloads (e-books, trading courses, software licenses). After purchase, user gets a download link.
+
+4. AI Assistant – "Ask AI"
+Chat interface where traders ask questions like:
+
+"Generate a high-performance trading algorithm for crypto"
+
+"Analyze this market data"
+
+"What are the best indicators for scalping?"
+
+AI responses powered by an LLM (OpenAI API or local model) with context about the user's purchased assets/subscriptions.
+
+Save conversations and export strategies.
+
+Admin can configure AI prompt, model, and add custom knowledge bases.
+
+5. Admin Panel (Your Exclusive Control)
+Only accessible by you (check admin role via email/env var).
+
+Dashboard: Overview of users, sales, subscriptions.
+
+Content Management:
+
+Add/Edit/Delete products (with images, categories, pricing, tags)
+
+Manage categories
+
+Manage subscription plans
+
+Upload media files for Media Store
+
+Update AI assistant settings (API key, prompt templates, etc.)
+
+User Management: View/delete users, grant admin privileges (only you).
+
+Analytics: Simple charts of revenue, popular products.
+
+6. Dynamic "Add Anything Anytime"
+Admin can create new pages (e.g., blog, tool) via a WYSIWYG editor or Markdown. These pages become accessible via URL.
+
+Admin can inject custom HTML/JavaScript components into any page (for embedding trading charts, widgets, etc.).
+
+All content stored in database and rendered dynamically – no hardcoding.
+
+Tech Stack Recommendation
+Frontend: Next.js (React) with Tailwind CSS, shadcn/ui or similar component library.
+
+Backend: Node.js + Express (or Next.js API routes) – RESTful API.
+
+Database: PostgreSQL (or MongoDB) with Prisma ORM.
+
+Authentication: NextAuth.js or custom JWT.
+
+Payments: Stripe integration for one-time and recurring payments.
+
+AI: OpenAI API (GPT-4) – store API key securely.
+
+File Storage: AWS S3 or Cloudinary for images/media.
+
+Deployment: Dockerized, deployable on Vercel (frontend) + Render/Heroku (backend) or a single VPS.
+
+Database Schema (Simplified)
+User: id, email, passwordHash, role, createdAt
+
+Product: id, name, description, price, salePrice, categoryId, imageUrl, isDigital, isSubscription, createdAt
+
+Category: id, name, slug
+
+SubscriptionPlan: id, name, price, interval, features, productId (optional)
+
+Purchase: id, userId, productId, amount, status, createdAt
+
+Subscription: id, userId, planId, startDate, endDate, status
+
+Page: id, title, slug, content (HTML/Markdown), createdAt
+
+AISettings: id, apiKey, promptTemplate, modelName (singleton)
+
+User Stories
+As a trader, I want to browse digital trading tools and see their prices and categories.
+
+As a trader, I want to ask an AI for trading strategies based on my preferences.
+
+As a trader, I want to purchase or subscribe to products securely.
+
+As the admin, I want to add new products, change prices, and create new pages without coding.
+
+As the admin, I want to control the AI’s behavior and knowledge.
+
+As the admin, I want to see analytics of my platform’s performance.
+
+Instructions for Implementation
+Write clean, modular, and well-documented code.
+
+Use environment variables for sensitive data.
+
+Ensure admin panel is securely locked to one user (check via email or secret env var).
+
+Write tests for critical paths (authentication, payments, admin actions).
+
+Provide a detailed README with setup instructions.
+
+Make UI intuitive and visually appealing, referencing the attached image description: product cards with images, category badges, prices, "Digital" tags, and a clean layout.

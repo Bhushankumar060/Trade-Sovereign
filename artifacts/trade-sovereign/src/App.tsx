@@ -19,6 +19,8 @@ import Subscriptions from "@/pages/Subscriptions";
 import Orders from "@/pages/Orders";
 import Rewards from "@/pages/Rewards";
 import Admin from "@/pages/Admin";
+import AiChat from "@/pages/AiChat";
+import DynamicPage from "@/pages/DynamicPage";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -43,6 +45,8 @@ function Router() {
       <Route path="/orders" component={Orders} />
       <Route path="/rewards" component={Rewards} />
       <Route path="/admin" component={Admin} />
+      <Route path="/chat" component={AiChat} />
+      <Route path="/pages/:slug" component={DynamicPage} />
       <Route component={NotFound} />
     </Switch>
   );

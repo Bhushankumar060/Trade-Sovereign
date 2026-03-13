@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Trade Sovereign API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
@@ -39,9 +39,39 @@ export interface UpdateProfileRequest {
   displayName?: string;
 }
 
+export type UpdateUserRoleRequestRole =
+  (typeof UpdateUserRoleRequestRole)[keyof typeof UpdateUserRoleRequestRole];
+
+export const UpdateUserRoleRequestRole = {
+  user: "user",
+  admin: "admin",
+} as const;
+
+export interface UpdateUserRoleRequest {
+  role: UpdateUserRoleRequestRole;
+}
+
 export interface UserListResponse {
   users: User[];
   total: number;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  productCount?: number;
+  createdAt: string;
+}
+
+export interface CategoryListResponse {
+  categories: Category[];
+  total: number;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  slug: string;
 }
 
 export interface Product {
@@ -49,10 +79,13 @@ export interface Product {
   name: string;
   description?: string;
   price: number;
+  salePrice?: number;
   category: string;
+  tags?: string[];
   stock: number;
   imageUrl?: string;
   isDigital: boolean;
+  isSubscription: boolean;
   createdAt: string;
 }
 
@@ -67,20 +100,26 @@ export interface CreateProductRequest {
   name: string;
   description?: string;
   price: number;
+  salePrice?: number;
   category: string;
+  tags?: string[];
   stock: number;
   imageUrl?: string;
   isDigital: boolean;
+  isSubscription: boolean;
 }
 
 export interface UpdateProductRequest {
   name?: string;
   description?: string;
   price?: number;
+  salePrice?: number;
   category?: string;
+  tags?: string[];
   stock?: number;
   imageUrl?: string;
   isDigital?: boolean;
+  isSubscription?: boolean;
 }
 
 export type MediaItemType = (typeof MediaItemType)[keyof typeof MediaItemType];
@@ -254,6 +293,14 @@ export interface SubscriptionPlansResponse {
   plans: SubscriptionPlan[];
 }
 
+export interface CreateSubscriptionPlanRequest {
+  name: string;
+  price: number;
+  yearlyPrice: number;
+  features: string[];
+  isPopular: boolean;
+}
+
 export interface RewardEntry {
   id: string;
   points: number;
@@ -298,6 +345,102 @@ export interface AiSearchResponse {
   interpretation: string;
 }
 
+export type ChatMessageRole =
+  (typeof ChatMessageRole)[keyof typeof ChatMessageRole];
+
+export const ChatMessageRole = {
+  user: "user",
+  assistant: "assistant",
+} as const;
+
+export interface ChatMessage {
+  role: ChatMessageRole;
+  content: string;
+}
+
+export interface AiChatRequest {
+  message: string;
+  history?: ChatMessage[];
+  context?: string;
+}
+
+export interface AiChatResponse {
+  reply: string;
+  tokensUsed?: number;
+}
+
+export interface Conversation {
+  id: string;
+  userId: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConversationListResponse {
+  conversations: Conversation[];
+}
+
+export interface SaveConversationRequest {
+  title: string;
+  messages: ChatMessage[];
+}
+
+export type PageContentType =
+  (typeof PageContentType)[keyof typeof PageContentType];
+
+export const PageContentType = {
+  markdown: "markdown",
+  html: "html",
+} as const;
+
+export interface Page {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  contentType: PageContentType;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PageListResponse {
+  pages: Page[];
+  total: number;
+}
+
+export type CreatePageRequestContentType =
+  (typeof CreatePageRequestContentType)[keyof typeof CreatePageRequestContentType];
+
+export const CreatePageRequestContentType = {
+  markdown: "markdown",
+  html: "html",
+} as const;
+
+export interface CreatePageRequest {
+  title: string;
+  slug: string;
+  content: string;
+  contentType: CreatePageRequestContentType;
+  isPublished: boolean;
+}
+
+export interface AiSettings {
+  id: string;
+  modelName: string;
+  promptTemplate: string;
+  hasApiKey: boolean;
+  updatedAt: string;
+}
+
+export interface UpdateAiSettingsRequest {
+  modelName?: string;
+  promptTemplate?: string;
+  apiKey?: string;
+}
+
 export interface AdminStats {
   totalUsers: number;
   totalOrders: number;
@@ -308,9 +451,41 @@ export interface AdminStats {
   recentOrders: Order[];
 }
 
+export interface DayRevenue {
+  date: string;
+  revenue: number;
+  orders: number;
+}
+
+export interface ProductStat {
+  name: string;
+  sales: number;
+  revenue: number;
+}
+
+export interface StatusCount {
+  status: string;
+  count: number;
+}
+
+export interface DayCount {
+  date: string;
+  count: number;
+}
+
+export interface AnalyticsResponse {
+  revenueByDay: DayRevenue[];
+  topProducts: ProductStat[];
+  ordersByStatus: StatusCount[];
+  newUsersByDay: DayCount[];
+}
+
 export type ListProductsParams = {
   category?: string;
   search?: string;
+  tag?: string;
+  minPrice?: number;
+  maxPrice?: number;
   page?: number;
   limit?: number;
 };
@@ -326,4 +501,17 @@ export type ListMediaType = (typeof ListMediaType)[keyof typeof ListMediaType];
 export const ListMediaType = {
   music: "music",
   movie: "movie",
+} as const;
+
+export type AdminGetAnalyticsParams = {
+  period?: AdminGetAnalyticsPeriod;
+};
+
+export type AdminGetAnalyticsPeriod =
+  (typeof AdminGetAnalyticsPeriod)[keyof typeof AdminGetAnalyticsPeriod];
+
+export const AdminGetAnalyticsPeriod = {
+  "7d": "7d",
+  "30d": "30d",
+  "90d": "90d",
 } as const;

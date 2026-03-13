@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Trade Sovereign API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface Product {
@@ -11,9 +11,12 @@ export interface Product {
   name: string;
   description?: string;
   price: number;
+  salePrice?: number;
   category: string;
+  tags?: string[];
   stock: number;
   imageUrl?: string;
   isDigital: boolean;
+  isSubscription: boolean;
   createdAt: string;
 }

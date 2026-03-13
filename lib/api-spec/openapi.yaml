@@ -1,32 +1,24 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: Trade Sovereign API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: auth
-    description: Authentication operations
   - name: products
-    description: Product catalog operations
   - name: media
-    description: Media store operations
   - name: orders
-    description: Order management operations
   - name: subscriptions
-    description: Subscription management
   - name: rewards
-    description: Rewards/loyalty system
   - name: admin
-    description: Admin panel operations
   - name: ai
-    description: AI-powered features
   - name: payments
-    description: Payment processing
+  - name: categories
+  - name: pages
 
 paths:
   /healthz:
@@ -46,7 +38,6 @@ paths:
     get:
       operationId: getMe
       tags: [auth]
-      summary: Get current user profile
       security:
         - bearerAuth: []
       responses:
@@ -67,7 +58,6 @@ paths:
     put:
       operationId: updateProfile
       tags: [auth]
-      summary: Update user profile
       security:
         - bearerAuth: []
       requestBody:
@@ -84,11 +74,41 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: Categories list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListResponse"
+
+  /categories/{id}:
+    get:
+      operationId: getCategory
+      tags: [categories]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
   /products:
     get:
       operationId: listProducts
       tags: [products]
-      summary: List all products
       parameters:
         - name: category
           in: query
@@ -98,6 +118,18 @@ paths:
           in: query
           schema:
             type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
         - name: page
           in: query
           schema:
@@ -118,7 +150,6 @@ paths:
     get:
       operationId: getProduct
       tags: [products]
-      summary: Get product by ID
       parameters:
         - name: id
           in: path
@@ -143,7 +174,6 @@ paths:
     get:
       operationId: listMedia
       tags: [media]
-      summary: List media items
       parameters:
         - name: type
           in: query
@@ -170,7 +200,6 @@ paths:
     get:
       operationId: getMediaItem
       tags: [media]
-      summary: Get media item by ID
       parameters:
         - name: id
           in: path
@@ -189,7 +218,6 @@ paths:
     get:
       operationId: getMediaDownloadUrl
       tags: [media]
-      summary: Get secure download URL for purchased media
       security:
         - bearerAuth: []
       parameters:
@@ -216,7 +244,6 @@ paths:
     get:
       operationId: listOrders
       tags: [orders]
-      summary: List user orders
       security:
         - bearerAuth: []
       responses:
@@ -231,7 +258,6 @@ paths:
     get:
       operationId: getOrder
       tags: [orders]
-      summary: Get order by ID
       security:
         - bearerAuth: []
       parameters:
@@ -252,7 +278,6 @@ paths:
     post:
       operationId: createPaymentOrder
       tags: [payments]
-      summary: Create Razorpay payment order
       security:
         - bearerAuth: []
       requestBody:
@@ -273,7 +298,6 @@ paths:
     post:
       operationId: verifyPayment
       tags: [payments]
-      summary: Verify Razorpay payment signature
       security:
         - bearerAuth: []
       requestBody:
@@ -294,7 +318,6 @@ paths:
     get:
       operationId: getMySubscription
       tags: [subscriptions]
-      summary: Get current user subscription
       security:
         - bearerAuth: []
       responses:
@@ -309,7 +332,6 @@ paths:
     get:
       operationId: listSubscriptionPlans
       tags: [subscriptions]
-      summary: List subscription plans
       responses:
         "200":
           description: Plans list
@@ -322,7 +344,6 @@ paths:
     get:
       operationId: getMyRewards
       tags: [rewards]
-      summary: Get current user rewards
       security:
         - bearerAuth: []
       responses:
@@ -337,7 +358,6 @@ paths:
     post:
       operationId: aiAnalyze
       tags: [ai]
-      summary: AI market trend analysis
       security:
         - bearerAuth: []
       requestBody:
@@ -358,7 +378,6 @@ paths:
     post:
       operationId: aiSearch
       tags: [ai]
-      summary: AI-powered natural language product search
       requestBody:
         required: true
         content:
@@ -373,11 +392,118 @@ paths:
               schema:
                 $ref: "#/components/schemas/AiSearchResponse"
 
+  /ai/chat:
+    post:
+      operationId: aiChat
+      tags: [ai]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatRequest"
+      responses:
+        "200":
+          description: AI chat response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiChatResponse"
+
+  /ai/conversations:
+    get:
+      operationId: listConversations
+      tags: [ai]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Saved conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationListResponse"
+    post:
+      operationId: saveConversation
+      tags: [ai]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveConversationRequest"
+      responses:
+        "201":
+          description: Conversation saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /ai/conversations/{id}:
+    delete:
+      operationId: deleteConversation
+      tags: [ai]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /pages:
+    get:
+      operationId: listPages
+      tags: [pages]
+      responses:
+        "200":
+          description: Pages list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageListResponse"
+
+  /pages/{slug}:
+    get:
+      operationId: getPage
+      tags: [pages]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Page content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /admin/products:
     get:
       operationId: adminListProducts
       tags: [admin]
-      summary: Admin list all products
       security:
         - bearerAuth: []
       responses:
@@ -390,7 +516,6 @@ paths:
     post:
       operationId: adminCreateProduct
       tags: [admin]
-      summary: Create product
       security:
         - bearerAuth: []
       requestBody:
@@ -411,7 +536,6 @@ paths:
     put:
       operationId: adminUpdateProduct
       tags: [admin]
-      summary: Update product
       security:
         - bearerAuth: []
       parameters:
@@ -436,7 +560,6 @@ paths:
     delete:
       operationId: adminDeleteProduct
       tags: [admin]
-      summary: Delete product
       security:
         - bearerAuth: []
       parameters:
@@ -457,7 +580,6 @@ paths:
     get:
       operationId: adminListMedia
       tags: [admin]
-      summary: Admin list all media
       security:
         - bearerAuth: []
       responses:
@@ -470,7 +592,6 @@ paths:
     post:
       operationId: adminCreateMedia
       tags: [admin]
-      summary: Create media item
       security:
         - bearerAuth: []
       requestBody:
@@ -491,7 +612,6 @@ paths:
     get:
       operationId: adminListUsers
       tags: [admin]
-      summary: Admin list all users
       security:
         - bearerAuth: []
       responses:
@@ -502,11 +622,36 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserListResponse"
 
+  /admin/users/{id}/role:
+    put:
+      operationId: adminUpdateUserRole
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRoleRequest"
+      responses:
+        "200":
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
   /admin/stats:
     get:
       operationId: adminGetStats
       tags: [admin]
-      summary: Admin dashboard stats
       security:
         - bearerAuth: []
       responses:
@@ -516,6 +661,286 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AdminStats"
+
+  /admin/analytics:
+    get:
+      operationId: adminGetAnalytics
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+      responses:
+        "200":
+          description: Analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsResponse"
+
+  /admin/categories:
+    get:
+      operationId: adminListCategories
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryListResponse"
+    post:
+      operationId: adminCreateCategory
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /admin/categories/{id}:
+    put:
+      operationId: adminUpdateCategory
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: adminDeleteCategory
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/pages:
+    get:
+      operationId: adminListPages
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Pages list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PageListResponse"
+    post:
+      operationId: adminCreatePage
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePageRequest"
+      responses:
+        "201":
+          description: Page created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+
+  /admin/pages/{id}:
+    put:
+      operationId: adminUpdatePage
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePageRequest"
+      responses:
+        "200":
+          description: Page updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+    delete:
+      operationId: adminDeletePage
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/ai-settings:
+    get:
+      operationId: adminGetAiSettings
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: AI settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
+    put:
+      operationId: adminUpdateAiSettings
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAiSettingsRequest"
+      responses:
+        "200":
+          description: AI settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSettings"
+
+  /admin/subscription-plans:
+    get:
+      operationId: adminListSubscriptionPlans
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Plans
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionPlansResponse"
+    post:
+      operationId: adminCreateSubscriptionPlan
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionPlanRequest"
+      responses:
+        "201":
+          description: Plan created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionPlan"
+
+  /admin/subscription-plans/{id}:
+    put:
+      operationId: adminUpdateSubscriptionPlan
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionPlanRequest"
+      responses:
+        "200":
+          description: Plan updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionPlan"
+    delete:
+      operationId: adminDeleteSubscriptionPlan
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
 
 components:
   securitySchemes:
@@ -530,8 +955,7 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     ErrorResponse:
       type: object
@@ -540,8 +964,7 @@ components:
           type: string
         message:
           type: string
-      required:
-        - error
+      required: [error]
 
     SuccessResponse:
       type: object
@@ -550,8 +973,7 @@ components:
           type: boolean
         message:
           type: string
-      required:
-        - success
+      required: [success]
 
     User:
       type: object
@@ -569,18 +991,21 @@ components:
           type: number
         createdAt:
           type: string
-      required:
-        - id
-        - email
-        - role
-        - loyaltyPoints
-        - createdAt
+      required: [id, email, role, loyaltyPoints, createdAt]
 
     UpdateProfileRequest:
       type: object
       properties:
         displayName:
           type: string
+
+    UpdateUserRoleRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, admin]
+      required: [role]
 
     UserListResponse:
       type: object
@@ -591,9 +1016,42 @@ components:
             $ref: "#/components/schemas/User"
         total:
           type: number
-      required:
-        - users
-        - total
+      required: [users, total]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        productCount:
+          type: number
+        createdAt:
+          type: string
+      required: [id, name, slug, createdAt]
+
+    CategoryListResponse:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        total:
+          type: number
+      required: [categories, total]
+
+    CreateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+      required: [name, slug]
 
     Product:
       type: object
@@ -606,24 +1064,25 @@ components:
           type: string
         price:
           type: number
+        salePrice:
+          type: number
         category:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
         stock:
           type: number
         imageUrl:
           type: string
         isDigital:
           type: boolean
+        isSubscription:
+          type: boolean
         createdAt:
           type: string
-      required:
-        - id
-        - name
-        - price
-        - category
-        - stock
-        - isDigital
-        - createdAt
+      required: [id, name, price, category, stock, isDigital, isSubscription, createdAt]
 
     ProductListResponse:
       type: object
@@ -638,9 +1097,7 @@ components:
           type: number
         limit:
           type: number
-      required:
-        - products
-        - total
+      required: [products, total]
 
     CreateProductRequest:
       type: object
@@ -651,20 +1108,23 @@ components:
           type: string
         price:
           type: number
+        salePrice:
+          type: number
         category:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
         stock:
           type: number
         imageUrl:
           type: string
         isDigital:
           type: boolean
-      required:
-        - name
-        - price
-        - category
-        - stock
-        - isDigital
+        isSubscription:
+          type: boolean
+      required: [name, price, category, stock, isDigital, isSubscription]
 
     UpdateProductRequest:
       type: object
@@ -675,13 +1135,21 @@ components:
           type: string
         price:
           type: number
+        salePrice:
+          type: number
         category:
           type: string
+        tags:
+          type: array
+          items:
+            type: string
         stock:
           type: number
         imageUrl:
           type: string
         isDigital:
+          type: boolean
+        isSubscription:
           type: boolean
 
     MediaItem:
@@ -706,13 +1174,7 @@ components:
           type: string
         createdAt:
           type: string
-      required:
-        - id
-        - title
-        - type
-        - price
-        - licenseType
-        - createdAt
+      required: [id, title, type, price, licenseType, createdAt]
 
     MediaListResponse:
       type: object
@@ -727,9 +1189,7 @@ components:
           type: number
         limit:
           type: number
-      required:
-        - items
-        - total
+      required: [items, total]
 
     CreateMediaRequest:
       type: object
@@ -749,11 +1209,7 @@ components:
           type: string
         licenseType:
           type: string
-      required:
-        - title
-        - type
-        - price
-        - licenseType
+      required: [title, type, price, licenseType]
 
     DownloadUrlResponse:
       type: object
@@ -762,9 +1218,7 @@ components:
           type: string
         expiresAt:
           type: string
-      required:
-        - url
-        - expiresAt
+      required: [url, expiresAt]
 
     Order:
       type: object
@@ -786,12 +1240,7 @@ components:
             $ref: "#/components/schemas/OrderItem"
         createdAt:
           type: string
-      required:
-        - id
-        - userId
-        - status
-        - total
-        - createdAt
+      required: [id, userId, status, total, createdAt]
 
     OrderItem:
       type: object
@@ -808,10 +1257,7 @@ components:
           type: number
         quantity:
           type: number
-      required:
-        - id
-        - price
-        - quantity
+      required: [id, price, quantity]
 
     OrderListResponse:
       type: object
@@ -822,9 +1268,7 @@ components:
             $ref: "#/components/schemas/Order"
         total:
           type: number
-      required:
-        - orders
-        - total
+      required: [orders, total]
 
     CreateOrderRequest:
       type: object
@@ -838,9 +1282,7 @@ components:
           enum: [product, media, subscription]
         subscriptionPlan:
           type: string
-      required:
-        - items
-        - type
+      required: [items, type]
 
     CartItem:
       type: object
@@ -852,10 +1294,7 @@ components:
         type:
           type: string
           enum: [product, media]
-      required:
-        - id
-        - quantity
-        - type
+      required: [id, quantity, type]
 
     RazorpayOrderResponse:
       type: object
@@ -870,12 +1309,7 @@ components:
           type: string
         keyId:
           type: string
-      required:
-        - orderId
-        - razorpayOrderId
-        - amount
-        - currency
-        - keyId
+      required: [orderId, razorpayOrderId, amount, currency, keyId]
 
     VerifyPaymentRequest:
       type: object
@@ -888,11 +1322,7 @@ components:
           type: string
         razorpaySignature:
           type: string
-      required:
-        - orderId
-        - razorpayOrderId
-        - razorpayPaymentId
-        - razorpaySignature
+      required: [orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature]
 
     VerifyPaymentResponse:
       type: object
@@ -903,9 +1333,7 @@ components:
           type: string
         message:
           type: string
-      required:
-        - success
-        - orderId
+      required: [success, orderId]
 
     Subscription:
       type: object
@@ -924,12 +1352,7 @@ components:
           type: string
         createdAt:
           type: string
-      required:
-        - id
-        - userId
-        - planType
-        - status
-        - createdAt
+      required: [id, userId, planType, status, createdAt]
 
     SubscriptionPlan:
       type: object
@@ -948,13 +1371,7 @@ components:
             type: string
         isPopular:
           type: boolean
-      required:
-        - id
-        - name
-        - price
-        - yearlyPrice
-        - features
-        - isPopular
+      required: [id, name, price, yearlyPrice, features, isPopular]
 
     SubscriptionPlansResponse:
       type: object
@@ -963,8 +1380,24 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SubscriptionPlan"
-      required:
-        - plans
+      required: [plans]
+
+    CreateSubscriptionPlanRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        yearlyPrice:
+          type: number
+        features:
+          type: array
+          items:
+            type: string
+        isPopular:
+          type: boolean
+      required: [name, price, yearlyPrice, features, isPopular]
 
     RewardsResponse:
       type: object
@@ -977,10 +1410,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RewardEntry"
-      required:
-        - totalPoints
-        - tier
-        - history
+      required: [totalPoints, tier, history]
 
     RewardEntry:
       type: object
@@ -995,12 +1425,7 @@ components:
           type: string
         createdAt:
           type: string
-      required:
-        - id
-        - points
-        - type
-        - description
-        - createdAt
+      required: [id, points, type, description, createdAt]
 
     AiAnalyzeRequest:
       type: object
@@ -1009,8 +1434,7 @@ components:
           type: string
         symbol:
           type: string
-      required:
-        - query
+      required: [query]
 
     AiAnalyzeResponse:
       type: object
@@ -1026,19 +1450,14 @@ components:
             type: string
         disclaimer:
           type: string
-      required:
-        - analysis
-        - sentiment
-        - keyPoints
-        - disclaimer
+      required: [analysis, sentiment, keyPoints, disclaimer]
 
     AiSearchRequest:
       type: object
       properties:
         query:
           type: string
-      required:
-        - query
+      required: [query]
 
     AiSearchResponse:
       type: object
@@ -1049,9 +1468,152 @@ components:
             $ref: "#/components/schemas/Product"
         interpretation:
           type: string
-      required:
-        - results
-        - interpretation
+      required: [results, interpretation]
+
+    ChatMessage:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+      required: [role, content]
+
+    AiChatRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        context:
+          type: string
+      required: [message]
+
+    AiChatResponse:
+      type: object
+      properties:
+        reply:
+          type: string
+        tokensUsed:
+          type: number
+      required: [reply]
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        title:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, userId, title, messages, createdAt, updatedAt]
+
+    ConversationListResponse:
+      type: object
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+      required: [conversations]
+
+    SaveConversationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/ChatMessage"
+      required: [title, messages]
+
+    Page:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        contentType:
+          type: string
+          enum: [markdown, html]
+        isPublished:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, title, slug, content, contentType, isPublished, createdAt, updatedAt]
+
+    PageListResponse:
+      type: object
+      properties:
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Page"
+        total:
+          type: number
+      required: [pages, total]
+
+    CreatePageRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        contentType:
+          type: string
+          enum: [markdown, html]
+        isPublished:
+          type: boolean
+      required: [title, slug, content, contentType, isPublished]
+
+    AiSettings:
+      type: object
+      properties:
+        id:
+          type: string
+        modelName:
+          type: string
+        promptTemplate:
+          type: string
+        hasApiKey:
+          type: boolean
+        updatedAt:
+          type: string
+      required: [id, modelName, promptTemplate, hasApiKey, updatedAt]
+
+    UpdateAiSettingsRequest:
+      type: object
+      properties:
+        modelName:
+          type: string
+        promptTemplate:
+          type: string
+        apiKey:
+          type: string
 
     AdminStats:
       type: object
@@ -1072,11 +1634,65 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Order"
-      required:
-        - totalUsers
-        - totalOrders
-        - totalRevenue
-        - totalProducts
-        - totalMediaItems
-        - activeSubscriptions
-        - recentOrders
+      required: [totalUsers, totalOrders, totalRevenue, totalProducts, totalMediaItems, activeSubscriptions, recentOrders]
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        revenueByDay:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayRevenue"
+        topProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductStat"
+        ordersByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        newUsersByDay:
+          type: array
+          items:
+            $ref: "#/components/schemas/DayCount"
+      required: [revenueByDay, topProducts, ordersByStatus, newUsersByDay]
+
+    DayRevenue:
+      type: object
+      properties:
+        date:
+          type: string
+        revenue:
+          type: number
+        orders:
+          type: number
+      required: [date, revenue, orders]
+
+    DayCount:
+      type: object
+      properties:
+        date:
+          type: string
+        count:
+          type: number
+      required: [date, count]
+
+    ProductStat:
+      type: object
+      properties:
+        name:
+          type: string
+        sales:
+          type: number
+        revenue:
+          type: number
+      required: [name, sales, revenue]
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: number
+      required: [status, count]

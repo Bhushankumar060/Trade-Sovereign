@@ -3,22 +3,40 @@
  * Do not edit manually.
  * Api
  * Trade Sovereign API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
+export * from "./adminGetAnalyticsParams";
+export * from "./adminGetAnalyticsPeriod";
 export * from "./adminStats";
 export * from "./aiAnalyzeRequest";
 export * from "./aiAnalyzeResponse";
 export * from "./aiAnalyzeResponseSentiment";
+export * from "./aiChatRequest";
+export * from "./aiChatResponse";
 export * from "./aiSearchRequest";
 export * from "./aiSearchResponse";
+export * from "./aiSettings";
+export * from "./analyticsResponse";
 export * from "./cartItem";
 export * from "./cartItemType";
+export * from "./category";
+export * from "./categoryListResponse";
+export * from "./chatMessage";
+export * from "./chatMessageRole";
+export * from "./conversation";
+export * from "./conversationListResponse";
+export * from "./createCategoryRequest";
 export * from "./createMediaRequest";
 export * from "./createMediaRequestType";
 export * from "./createOrderRequest";
 export * from "./createOrderRequestType";
+export * from "./createPageRequest";
+export * from "./createPageRequestContentType";
 export * from "./createProductRequest";
+export * from "./createSubscriptionPlanRequest";
+export * from "./dayCount";
+export * from "./dayRevenue";
 export * from "./downloadUrlResponse";
 export * from "./errorResponse";
 export * from "./healthStatus";
@@ -32,19 +50,28 @@ export * from "./order";
 export * from "./orderItem";
 export * from "./orderListResponse";
 export * from "./orderStatus";
+export * from "./page";
+export * from "./pageContentType";
+export * from "./pageListResponse";
 export * from "./product";
 export * from "./productListResponse";
+export * from "./productStat";
 export * from "./razorpayOrderResponse";
 export * from "./rewardEntry";
 export * from "./rewardsResponse";
+export * from "./saveConversationRequest";
+export * from "./statusCount";
 export * from "./subscription";
 export * from "./subscriptionPlan";
 export * from "./subscriptionPlansResponse";
 export * from "./subscriptionPlanType";
 export * from "./subscriptionStatus";
 export * from "./successResponse";
+export * from "./updateAiSettingsRequest";
 export * from "./updateProductRequest";
 export * from "./updateProfileRequest";
+export * from "./updateUserRoleRequest";
+export * from "./updateUserRoleRequestRole";
 export * from "./user";
 export * from "./userListResponse";
 export * from "./userRole";

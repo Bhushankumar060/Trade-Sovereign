@@ -3,12 +3,15 @@
  * Do not edit manually.
  * Api
  * Trade Sovereign API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export type ListProductsParams = {
   category?: string;
   search?: string;
+  tag?: string;
+  minPrice?: number;
+  maxPrice?: number;
   page?: number;
   limit?: number;
 };

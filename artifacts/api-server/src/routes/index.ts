@@ -9,6 +9,9 @@ import subscriptionsRouter from "./subscriptions.js";
 import rewardsRouter from "./rewards.js";
 import aiRouter from "./ai.js";
 import adminRouter from "./admin.js";
+import categoriesRouter from "./categories.js";
+import pagesRouter from "./pages.js";
+import conversationsRouter from "./conversations.js";
 
 const router: IRouter = Router();
 
@@ -20,7 +23,10 @@ router.use("/orders", ordersRouter);
 router.use("/payments", paymentsRouter);
 router.use("/subscriptions", subscriptionsRouter);
 router.use("/rewards", rewardsRouter);
+router.use("/ai/conversations", conversationsRouter);
 router.use("/ai", aiRouter);
 router.use("/admin", adminRouter);
+router.use("/categories", categoriesRouter);
+router.use("/pages", pagesRouter);
 
 export default router;

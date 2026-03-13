@@ -5,7 +5,7 @@ import { authenticate, AuthRequest } from "../middlewares/auth.js";
 
 const router: IRouter = Router();
 
-function mapMedia(m: typeof mediaTable.$inferSelect) {
+export function mapMedia(m: typeof mediaTable.$inferSelect) {
   return {
     id: m.id,
     title: m.title,
@@ -92,5 +92,4 @@ router.get("/:id/download", authenticate, async (req: AuthRequest, res: Response
   }
 });
 
-export { mapMedia };
 export default router;

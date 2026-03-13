@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Api
  * Trade Sovereign API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from "zod";
 
@@ -14,9 +14,6 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
 
-/**
- * @summary Get current user profile
- */
 export const GetMeResponse = zod.object({
   id: zod.string(),
   email: zod.string(),
@@ -26,9 +23,6 @@ export const GetMeResponse = zod.object({
   createdAt: zod.string(),
 });
 
-/**
- * @summary Update user profile
- */
 export const UpdateProfileBody = zod.object({
   displayName: zod.string().optional(),
 });
@@ -43,11 +37,39 @@ export const UpdateProfileResponse = zod.object({
 });
 
 /**
- * @summary List all products
+ * @summary List all categories
  */
+export const ListCategoriesResponse = zod.object({
+  categories: zod.array(
+    zod.object({
+      id: zod.string(),
+      name: zod.string(),
+      slug: zod.string(),
+      productCount: zod.number().optional(),
+      createdAt: zod.string(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+export const GetCategoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetCategoryResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  slug: zod.string(),
+  productCount: zod.number().optional(),
+  createdAt: zod.string(),
+});
+
 export const ListProductsQueryParams = zod.object({
   category: zod.coerce.string().optional(),
   search: zod.coerce.string().optional(),
+  tag: zod.coerce.string().optional(),
+  minPrice: zod.coerce.number().optional(),
+  maxPrice: zod.coerce.number().optional(),
   page: zod.coerce.number().optional(),
   limit: zod.coerce.number().optional(),
 });
@@ -59,10 +81,13 @@ export const ListProductsResponse = zod.object({
       name: zod.string(),
       description: zod.string().optional(),
       price: zod.number(),
+      salePrice: zod.number().optional(),
       category: zod.string(),
+      tags: zod.array(zod.string()).optional(),
       stock: zod.number(),
       imageUrl: zod.string().optional(),
       isDigital: zod.boolean(),
+      isSubscription: zod.boolean(),
       createdAt: zod.string(),
     }),
   ),
@@ -71,9 +96,6 @@ export const ListProductsResponse = zod.object({
   limit: zod.number().optional(),
 });
 
-/**
- * @summary Get product by ID
- */
 export const GetProductParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -83,16 +105,16 @@ export const GetProductResponse = zod.object({
   name: zod.string(),
   description: zod.string().optional(),
   price: zod.number(),
+  salePrice: zod.number().optional(),
   category: zod.string(),
+  tags: zod.array(zod.string()).optional(),
   stock: zod.number(),
   imageUrl: zod.string().optional(),
   isDigital: zod.boolean(),
+  isSubscription: zod.boolean(),
   createdAt: zod.string(),
 });
 
-/**
- * @summary List media items
- */
 export const ListMediaQueryParams = zod.object({
   type: zod.enum(["music", "movie"]).optional(),
   page: zod.coerce.number().optional(),
@@ -118,9 +140,6 @@ export const ListMediaResponse = zod.object({
   limit: zod.number().optional(),
 });
 
-/**
- * @summary Get media item by ID
- */
 export const GetMediaItemParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -137,9 +156,6 @@ export const GetMediaItemResponse = zod.object({
   createdAt: zod.string(),
 });
 
-/**
- * @summary Get secure download URL for purchased media
- */
 export const GetMediaDownloadUrlParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -149,9 +165,6 @@ export const GetMediaDownloadUrlResponse = zod.object({
   expiresAt: zod.string(),
 });
 
-/**
- * @summary List user orders
- */
 export const ListOrdersResponse = zod.object({
   orders: zod.array(
     zod.object({
@@ -178,9 +191,6 @@ export const ListOrdersResponse = zod.object({
   total: zod.number(),
 });
 
-/**
- * @summary Get order by ID
- */
 export const GetOrderParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -206,9 +216,6 @@ export const GetOrderResponse = zod.object({
   createdAt: zod.string(),
 });
 
-/**
- * @summary Create Razorpay payment order
- */
 export const CreatePaymentOrderBody = zod.object({
   items: zod.array(
     zod.object({
@@ -229,9 +236,6 @@ export const CreatePaymentOrderResponse = zod.object({
   keyId: zod.string(),
 });
 
-/**
- * @summary Verify Razorpay payment signature
- */
 export const VerifyPaymentBody = zod.object({
   orderId: zod.string(),
   razorpayOrderId: zod.string(),
@@ -245,9 +249,6 @@ export const VerifyPaymentResponse = zod.object({
   message: zod.string().optional(),
 });
 
-/**
- * @summary Get current user subscription
- */
 export const GetMySubscriptionResponse = zod.object({
   id: zod.string(),
   userId: zod.string(),
@@ -257,9 +258,6 @@ export const GetMySubscriptionResponse = zod.object({
   createdAt: zod.string(),
 });
 
-/**
- * @summary List subscription plans
- */
 export const ListSubscriptionPlansResponse = zod.object({
   plans: zod.array(
     zod.object({
@@ -273,9 +271,6 @@ export const ListSubscriptionPlansResponse = zod.object({
   ),
 });
 
-/**
- * @summary Get current user rewards
- */
 export const GetMyRewardsResponse = zod.object({
   totalPoints: zod.number(),
   tier: zod.string(),
@@ -290,9 +285,6 @@ export const GetMyRewardsResponse = zod.object({
   ),
 });
 
-/**
- * @summary AI market trend analysis
- */
 export const AiAnalyzeBody = zod.object({
   query: zod.string(),
   symbol: zod.string().optional(),
@@ -305,9 +297,6 @@ export const AiAnalyzeResponse = zod.object({
   disclaimer: zod.string(),
 });
 
-/**
- * @summary AI-powered natural language product search
- */
 export const AiSearchBody = zod.object({
   query: zod.string(),
 });
@@ -319,19 +308,105 @@ export const AiSearchResponse = zod.object({
       name: zod.string(),
       description: zod.string().optional(),
       price: zod.number(),
+      salePrice: zod.number().optional(),
       category: zod.string(),
+      tags: zod.array(zod.string()).optional(),
       stock: zod.number(),
       imageUrl: zod.string().optional(),
       isDigital: zod.boolean(),
+      isSubscription: zod.boolean(),
       createdAt: zod.string(),
     }),
   ),
   interpretation: zod.string(),
 });
 
-/**
- * @summary Admin list all products
- */
+export const AiChatBody = zod.object({
+  message: zod.string(),
+  history: zod
+    .array(
+      zod.object({
+        role: zod.enum(["user", "assistant"]),
+        content: zod.string(),
+      }),
+    )
+    .optional(),
+  context: zod.string().optional(),
+});
+
+export const AiChatResponse = zod.object({
+  reply: zod.string(),
+  tokensUsed: zod.number().optional(),
+});
+
+export const ListConversationsResponse = zod.object({
+  conversations: zod.array(
+    zod.object({
+      id: zod.string(),
+      userId: zod.string(),
+      title: zod.string(),
+      messages: zod.array(
+        zod.object({
+          role: zod.enum(["user", "assistant"]),
+          content: zod.string(),
+        }),
+      ),
+      createdAt: zod.string(),
+      updatedAt: zod.string(),
+    }),
+  ),
+});
+
+export const SaveConversationBody = zod.object({
+  title: zod.string(),
+  messages: zod.array(
+    zod.object({
+      role: zod.enum(["user", "assistant"]),
+      content: zod.string(),
+    }),
+  ),
+});
+
+export const DeleteConversationParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const DeleteConversationResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+export const ListPagesResponse = zod.object({
+  pages: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      slug: zod.string(),
+      content: zod.string(),
+      contentType: zod.enum(["markdown", "html"]),
+      isPublished: zod.boolean(),
+      createdAt: zod.string(),
+      updatedAt: zod.string(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+export const GetPageParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+export const GetPageResponse = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  slug: zod.string(),
+  content: zod.string(),
+  contentType: zod.enum(["markdown", "html"]),
+  isPublished: zod.boolean(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
 export const AdminListProductsResponse = zod.object({
   products: zod.array(
     zod.object({
@@ -339,10 +414,13 @@ export const AdminListProductsResponse = zod.object({
       name: zod.string(),
       description: zod.string().optional(),
       price: zod.number(),
+      salePrice: zod.number().optional(),
       category: zod.string(),
+      tags: zod.array(zod.string()).optional(),
       stock: zod.number(),
       imageUrl: zod.string().optional(),
       isDigital: zod.boolean(),
+      isSubscription: zod.boolean(),
       createdAt: zod.string(),
     }),
   ),
@@ -351,22 +429,19 @@ export const AdminListProductsResponse = zod.object({
   limit: zod.number().optional(),
 });
 
-/**
- * @summary Create product
- */
 export const AdminCreateProductBody = zod.object({
   name: zod.string(),
   description: zod.string().optional(),
   price: zod.number(),
+  salePrice: zod.number().optional(),
   category: zod.string(),
+  tags: zod.array(zod.string()).optional(),
   stock: zod.number(),
   imageUrl: zod.string().optional(),
   isDigital: zod.boolean(),
+  isSubscription: zod.boolean(),
 });
 
-/**
- * @summary Update product
- */
 export const AdminUpdateProductParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -375,10 +450,13 @@ export const AdminUpdateProductBody = zod.object({
   name: zod.string().optional(),
   description: zod.string().optional(),
   price: zod.number().optional(),
+  salePrice: zod.number().optional(),
   category: zod.string().optional(),
+  tags: zod.array(zod.string()).optional(),
   stock: zod.number().optional(),
   imageUrl: zod.string().optional(),
   isDigital: zod.boolean().optional(),
+  isSubscription: zod.boolean().optional(),
 });
 
 export const AdminUpdateProductResponse = zod.object({
@@ -386,16 +464,16 @@ export const AdminUpdateProductResponse = zod.object({
   name: zod.string(),
   description: zod.string().optional(),
   price: zod.number(),
+  salePrice: zod.number().optional(),
   category: zod.string(),
+  tags: zod.array(zod.string()).optional(),
   stock: zod.number(),
   imageUrl: zod.string().optional(),
   isDigital: zod.boolean(),
+  isSubscription: zod.boolean(),
   createdAt: zod.string(),
 });
 
-/**
- * @summary Delete product
- */
 export const AdminDeleteProductParams = zod.object({
   id: zod.coerce.string(),
 });
@@ -405,9 +483,6 @@ export const AdminDeleteProductResponse = zod.object({
   message: zod.string().optional(),
 });
 
-/**
- * @summary Admin list all media
- */
 export const AdminListMediaResponse = zod.object({
   items: zod.array(
     zod.object({
@@ -427,9 +502,6 @@ export const AdminListMediaResponse = zod.object({
   limit: zod.number().optional(),
 });
 
-/**
- * @summary Create media item
- */
 export const AdminCreateMediaBody = zod.object({
   title: zod.string(),
   type: zod.enum(["music", "movie"]),
@@ -440,9 +512,6 @@ export const AdminCreateMediaBody = zod.object({
   licenseType: zod.string(),
 });
 
-/**
- * @summary Admin list all users
- */
 export const AdminListUsersResponse = zod.object({
   users: zod.array(
     zod.object({
@@ -457,9 +526,19 @@ export const AdminListUsersResponse = zod.object({
   total: zod.number(),
 });
 
-/**
- * @summary Admin dashboard stats
- */
+export const AdminUpdateUserRoleParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdateUserRoleBody = zod.object({
+  role: zod.enum(["user", "admin"]),
+});
+
+export const AdminUpdateUserRoleResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
 export const AdminGetStatsResponse = zod.object({
   totalUsers: zod.number(),
   totalOrders: zod.number(),
@@ -489,4 +568,210 @@ export const AdminGetStatsResponse = zod.object({
       createdAt: zod.string(),
     }),
   ),
+});
+
+export const AdminGetAnalyticsQueryParams = zod.object({
+  period: zod.enum(["7d", "30d", "90d"]).optional(),
+});
+
+export const AdminGetAnalyticsResponse = zod.object({
+  revenueByDay: zod.array(
+    zod.object({
+      date: zod.string(),
+      revenue: zod.number(),
+      orders: zod.number(),
+    }),
+  ),
+  topProducts: zod.array(
+    zod.object({
+      name: zod.string(),
+      sales: zod.number(),
+      revenue: zod.number(),
+    }),
+  ),
+  ordersByStatus: zod.array(
+    zod.object({
+      status: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+  newUsersByDay: zod.array(
+    zod.object({
+      date: zod.string(),
+      count: zod.number(),
+    }),
+  ),
+});
+
+export const AdminListCategoriesResponse = zod.object({
+  categories: zod.array(
+    zod.object({
+      id: zod.string(),
+      name: zod.string(),
+      slug: zod.string(),
+      productCount: zod.number().optional(),
+      createdAt: zod.string(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+export const AdminCreateCategoryBody = zod.object({
+  name: zod.string(),
+  slug: zod.string(),
+});
+
+export const AdminUpdateCategoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdateCategoryBody = zod.object({
+  name: zod.string(),
+  slug: zod.string(),
+});
+
+export const AdminUpdateCategoryResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  slug: zod.string(),
+  productCount: zod.number().optional(),
+  createdAt: zod.string(),
+});
+
+export const AdminDeleteCategoryParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminDeleteCategoryResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+export const AdminListPagesResponse = zod.object({
+  pages: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      slug: zod.string(),
+      content: zod.string(),
+      contentType: zod.enum(["markdown", "html"]),
+      isPublished: zod.boolean(),
+      createdAt: zod.string(),
+      updatedAt: zod.string(),
+    }),
+  ),
+  total: zod.number(),
+});
+
+export const AdminCreatePageBody = zod.object({
+  title: zod.string(),
+  slug: zod.string(),
+  content: zod.string(),
+  contentType: zod.enum(["markdown", "html"]),
+  isPublished: zod.boolean(),
+});
+
+export const AdminUpdatePageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdatePageBody = zod.object({
+  title: zod.string(),
+  slug: zod.string(),
+  content: zod.string(),
+  contentType: zod.enum(["markdown", "html"]),
+  isPublished: zod.boolean(),
+});
+
+export const AdminUpdatePageResponse = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  slug: zod.string(),
+  content: zod.string(),
+  contentType: zod.enum(["markdown", "html"]),
+  isPublished: zod.boolean(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+
+export const AdminDeletePageParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminDeletePageResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
+});
+
+export const AdminGetAiSettingsResponse = zod.object({
+  id: zod.string(),
+  modelName: zod.string(),
+  promptTemplate: zod.string(),
+  hasApiKey: zod.boolean(),
+  updatedAt: zod.string(),
+});
+
+export const AdminUpdateAiSettingsBody = zod.object({
+  modelName: zod.string().optional(),
+  promptTemplate: zod.string().optional(),
+  apiKey: zod.string().optional(),
+});
+
+export const AdminUpdateAiSettingsResponse = zod.object({
+  id: zod.string(),
+  modelName: zod.string(),
+  promptTemplate: zod.string(),
+  hasApiKey: zod.boolean(),
+  updatedAt: zod.string(),
+});
+
+export const AdminListSubscriptionPlansResponse = zod.object({
+  plans: zod.array(
+    zod.object({
+      id: zod.string(),
+      name: zod.string(),
+      price: zod.number(),
+      yearlyPrice: zod.number(),
+      features: zod.array(zod.string()),
+      isPopular: zod.boolean(),
+    }),
+  ),
+});
+
+export const AdminCreateSubscriptionPlanBody = zod.object({
+  name: zod.string(),
+  price: zod.number(),
+  yearlyPrice: zod.number(),
+  features: zod.array(zod.string()),
+  isPopular: zod.boolean(),
+});
+
+export const AdminUpdateSubscriptionPlanParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminUpdateSubscriptionPlanBody = zod.object({
+  name: zod.string(),
+  price: zod.number(),
+  yearlyPrice: zod.number(),
+  features: zod.array(zod.string()),
+  isPopular: zod.boolean(),
+});
+
+export const AdminUpdateSubscriptionPlanResponse = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  price: zod.number(),
+  yearlyPrice: zod.number(),
+  features: zod.array(zod.string()),
+  isPopular: zod.boolean(),
+});
+
+export const AdminDeleteSubscriptionPlanParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AdminDeleteSubscriptionPlanResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string().optional(),
 });

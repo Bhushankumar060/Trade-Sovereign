@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
 import { Button, Badge } from "@/components/ui/design-system";
-import { ShoppingCart, User, LogOut, LayoutDashboard, Crown, Shield } from "lucide-react";
+import { ShoppingCart, LogOut, LayoutDashboard, Crown, Shield, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,6 +17,7 @@ export function Navbar() {
     { label: "Marketplace", href: "/marketplace" },
     { label: "Media Store", href: "/media" },
     { label: "Subscriptions", href: "/subscriptions" },
+    { label: "AI Assistant", href: "/chat" },
   ];
 
   return (

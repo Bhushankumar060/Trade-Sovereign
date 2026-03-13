@@ -67,15 +67,26 @@ artifacts-monorepo/
 
 ## Features
 
-1. **Marketplace** — Browse 12 digital trading products with AI smart search, category filters, cart
-2. **Media Store** — Music/movie catalog with purchase-gated download links
-3. **Dashboard** — TradingView chart widget + Trade Sovereign AI analysis panel
-4. **Subscriptions** — Free/Pro ($9.99)/Elite ($24.99) plans with Razorpay checkout
-5. **Orders** — Full order history with status tracking
-6. **Rewards** — Loyalty points earned on purchases (10pts per ₹), Bronze/Silver/Gold/Platinum tiers
-7. **Admin Panel** — Protected by role=admin. Stats, CRUD for products/media, user management
-8. **Auth** — Firebase email/password + Google Sign-in. ID tokens sent as Bearer headers
-9. **AI** — Gemini-powered market trend analysis + natural language product search (rate limited)
+1. **Marketplace** — Browse products with dynamic DB categories, AI smart search, sale prices (with % badge), tag filtering, cart
+2. **AI Chat** (`/chat`) — Full conversational AI with history sidebar, save/export conversations, starter prompts, typing indicator
+3. **Media Store** — Music/movie catalog with purchase-gated download links
+4. **Dashboard** — TradingView chart widget + Trade Sovereign AI analysis panel
+5. **Subscriptions** — Free/Pro ($9.99)/Elite ($24.99) plans loaded from DB (admin-manageable)
+6. **Orders** — Full order history with status tracking
+7. **Rewards** — Loyalty points earned on purchases (10pts per ₹), Bronze/Silver/Gold/Platinum tiers
+8. **Dynamic Pages** (`/pages/:slug`) — Admin-created pages with Markdown/HTML support, publicly accessible
+9. **Admin Panel** — 9-tab control panel:
+   - Overview: Stats + recent orders table
+   - Analytics: Revenue chart, top products, orders by status (pie), new users (recharts)
+   - Products: CRUD with sale price, tags, subscription flag
+   - Media Store: CRUD for music/movie items
+   - Users: Role management (promote/demote admins)
+   - Categories: Dynamic categories CRUD (reflects in marketplace filter)
+   - Pages: Page builder with markdown/HTML editor, draft/publish toggle
+   - AI Settings: Configure model (gemini-1.5-flash/pro/2.0), system prompt, custom API key
+   - Subscription Plans: Full CRUD for subscription tiers
+10. **Auth** — Firebase email/password + Google Sign-in. ID tokens sent as Bearer headers
+11. **AI** — Gemini-powered market trend analysis, natural language product search, full AI chat (rate limited)
 
 ## Security
 

@@ -1,115 +1,127 @@
 # Trade Sovereign - Product Requirements Document
 
-## Project Overview
-Trade Sovereign is a mobile-first trading super app that combines high-frequency trading analytics, AI-powered insights, copy trading, and a premium digital marketplace.
-
-## Original Problem Statement
-Build Trade Sovereign - a mobile-first trading super app with:
-- Firebase Authentication (Google Sign-in)
-- Razorpay Payment Gateway
-- Gemini 3 Flash AI Assistant (Sovereign AI)
-- TradingView Charts Integration
-- 3D Immersive UI Design
-- Copy Trading Functionality (Added Jan 14, 2026)
+## Overview
+Trade Sovereign is a mobile-first trading super-app combining high-frequency trading analytics, AI-powered insights, and a premium digital marketplace.
 
 ## Tech Stack
-- **Frontend**: React 18, TailwindCSS, Framer Motion
+- **Frontend**: React.js with TailwindCSS
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Auth**: Firebase Admin SDK
+- **Authentication**: Firebase (Email/Password + Google Sign-In)
 - **Payments**: Razorpay
-- **AI**: Gemini 3 Flash via Emergent LLM Key
-
-## Firebase Configuration
-- Project ID: trade-sovereign
-- API Key: AIzaSyAEXj4bLK0I1weKHUhGbRpY5s-kl5YiJ2g
-- Auth Domain: trade-sovereign.firebaseapp.com
-- App ID: 1:621839937817:web:bf28a8176932d2f9b69588
-
-## User Personas
-1. **Retail Traders** - Want trading tools, indicators, and AI insights
-2. **Professional Traders** - Need advanced analytics and premium subscriptions
-3. **Copy Traders** - Want to mirror successful traders
-4. **Signal Providers** - Traders who share signals with copiers
-5. **Platform Admin** - Manage products, users, and subscriptions
+- **AI**: Gemini 3 Flash via Emergent Integrations
 
 ## Core Features Implemented
 
-### Phase 1 - MVP (Jan 14, 2026)
+### 1. Authentication (Firebase)
+- Email/Password sign-in
+- Google Sign-In
+- Token-based backend authentication
+
+### 2. Copy Trading
+- View list of traders with stats (win rate, returns, copiers)
+- Copy traders with custom allocation
+- View trade signals from copied traders
+- Stop copying traders
+
+### 3. Automated Trade Execution
+- Connect broker accounts (Demo, Zerodha, Upstox, AngelOne, Groww)
+- Configure auto-execution settings (max trade size, risk per trade)
+- Execute signals manually or automatically
+- View execution history
+
+### 4. AI Chat (Gemini)
+- Trading assistant powered by Gemini 3 Flash
+- Market analysis and insights
+- Save/load conversation history
+
+### 5. Marketplace
+- Digital products and trading tools
+- Subscription plans (Free, Pro, Elite)
+- Razorpay payment integration
+- Loyalty rewards system
+
+### 6. Admin Panel
+- Dashboard with stats (users, orders, revenue)
+- Product management
+- User management
+- AI settings configuration
+
+## API Endpoints
+
+### Public
+- GET /api/healthz - Health check
+- GET /api/products - List products
+- GET /api/categories - List categories
+- GET /api/copy-trading/traders - List traders
+- GET /api/copy-trading/signals - List trade signals
+
+### Authenticated
+- GET /api/auth/me - Get current user
+- POST /api/ai/chat - AI chat
+- POST /api/broker/connect - Connect broker
+- GET /api/auto-execution/settings - Get settings
+- PUT /api/auto-execution/settings - Update settings
+- POST /api/auto-execution/execute - Execute trade
+
+## Database Schema
+
+### Collections
+- users: Firebase UID, email, role, loyalty points
+- products: name, price, category, stock
+- traders: user_id, win_rate, total_return, copiers
+- trade_signals: trader_id, symbol, action, entry_price
+- broker_connections: user_id, broker, status
+- auto_execution_settings: user_id, enabled, max_trade_size
+- trade_executions: user_id, signal_id, status
+
+## Environment Variables
+
+### Frontend (.env)
+- REACT_APP_BACKEND_URL
+- REACT_APP_FIREBASE_API_KEY
+- REACT_APP_FIREBASE_AUTH_DOMAIN
+- REACT_APP_FIREBASE_PROJECT_ID
+- REACT_APP_RAZORPAY_KEY_ID
+
+### Backend (.env)
+- MONGO_URL
+- DB_NAME
+- FIREBASE_PROJECT_ID
+- FIREBASE_CLIENT_EMAIL
+- FIREBASE_PRIVATE_KEY
+- RAZORPAY_KEY_ID
+- RAZORPAY_KEY_SECRET
+- EMERGENT_LLM_KEY
+- ADMIN_EMAIL
+
+## What's Been Completed
+- [x] Full-stack application scaffolding
 - [x] Firebase Authentication (Email + Google)
-- [x] User role management (Admin/User)
-- [x] Product Marketplace with categories
-- [x] Media Store (Music/Courses)
-- [x] Razorpay Payment Integration
-- [x] AI Chat Assistant (Gemini 3 Flash)
-- [x] AI Market Analysis
-- [x] TradingView Charts Integration
-- [x] Subscription Plans (Free/Pro/Elite)
-- [x] Loyalty Rewards System
-- [x] Order Management
-- [x] Admin Panel with CRUD operations
-- [x] 3D Glassmorphism UI
+- [x] Copy Trading feature
+- [x] Automated Trade Execution feature
+- [x] AI Chat with Gemini
+- [x] Marketplace with products
+- [x] Razorpay payment integration
+- [x] Loyalty rewards system
+- [x] Admin panel
+- [x] Logo and banner integration (Trident logo)
+- [x] Runtime error fixes (LinkOff icon)
 
-### Phase 2 - Copy Trading (Jan 14, 2026)
-- [x] Become a Trader registration
-- [x] List top traders with stats
-- [x] Trader profiles with win rate, return
-- [x] Create trade signals (BUY/SELL)
-- [x] Copy/Stop copying traders
-- [x] View my copies
-- [x] Signal confidence levels
-- [x] Stop loss and target price
-- [x] Verified trader badges
-
-### API Endpoints (40+ endpoints)
-**Auth**: /api/auth/me, /api/auth/profile
-**Products**: /api/products, /api/products/{id}
-**Categories**: /api/categories
-**Media**: /api/media, /api/media/{id}
-**Orders**: /api/orders
-**Payments**: /api/payments/create-order, /api/payments/verify
-**Subscriptions**: /api/subscriptions/plans, /api/subscriptions/my
-**Rewards**: /api/rewards/my
-**AI**: /api/ai/chat, /api/ai/analyze, /api/ai/search, /api/ai/conversations
-**Copy Trading**: /api/copy-trading/traders, /api/copy-trading/signals, /api/copy-trading/become-trader, /api/copy-trading/copy/{traderId}, /api/copy-trading/my-copies, /api/copy-trading/my-trader-profile
-**Admin**: /api/admin/* (stats, analytics, products, media, users, categories, pages, ai-settings, subscription-plans)
-
-## Test Results (Jan 14, 2026)
-- Backend: 95.2% pass rate (20/21 tests)
-- Frontend: 100% - All UI components working
-- Copy Trading: All APIs functional with seeded data
-
-## Seed Data
-- 4 Categories (Trading Tools, Indicators, Courses, Templates)
-- 4 Products
-- 2 Media Items
-- 3 Subscription Plans (Free, Pro, Elite)
-- 4 Sample Traders (CryptoMaster, ForexPro, QuantAlpha, SwingKing)
-- 3 Sample Trade Signals
-
-## Prioritized Backlog
-
-### P0 - Critical
-- [ ] Preview URL wake-up (platform issue)
-
-### P1 - High Priority
-- [ ] Real-time signal notifications
-- [ ] Portfolio tracking
-- [ ] Trade history analytics
-- [ ] WebSocket for live signals
-
-### P2 - Medium Priority
-- [ ] Social trading feed
-- [ ] Trader rankings leaderboard
-- [ ] Multi-language support
+## Pending/Future Tasks
+- [ ] Real broker API integration (currently using demo mode)
+- [ ] Email notifications for trade signals
 - [ ] Push notifications
-
-### P3 - Future
+- [ ] Advanced charting with TradingView
+- [ ] Social features (trader profiles, followers)
 - [ ] Mobile app (React Native)
-- [ ] API for third-party integrations
-- [ ] White-label solutions
-- [ ] Automated copy execution
 
----
-Last Updated: Jan 14, 2026
-Version: 2.0 (Copy Trading Release)
+## Known Limitations
+- Broker integration is MOCKED (demo mode only)
+- Google Sign-In requires Firebase project configuration
+- No real-time price data integration yet
+
+## Test Reports
+- /app/test_reports/iteration_1.json
+- /app/test_reports/iteration_2.json
+- /app/test_reports/iteration_3.json (Latest - All tests passing)

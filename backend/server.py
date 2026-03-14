@@ -439,7 +439,12 @@ async def list_products(
 @app.get("/api/products/{id}")
 async def get_product(id: str):
     from bson import ObjectId
-    product = await db.products.find_one({"_id": ObjectId(id)})
+    from bson.errors import InvalidId
+    try:
+        oid = ObjectId(id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid product ID format")
+    product = await db.products.find_one({"_id": oid})
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return serialize_doc(product)

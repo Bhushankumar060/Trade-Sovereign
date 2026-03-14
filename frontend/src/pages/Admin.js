@@ -16,7 +16,7 @@ import {
 } from '../lib/api';
 import {
   LayoutDashboard, Package, Film, Users, Settings, Crown, Shield, Lock,
-  Plus, Trash2, BarChart3, TrendingUp, DollarSign, ShoppingBag, Bot
+  Plus, Trash2, BarChart3, TrendingUp, DollarSign, ShoppingBag, Bot, FileText
 } from 'lucide-react';
 
 const TABS = [
@@ -24,6 +24,7 @@ const TABS = [
   { id: 'products', label: 'Products', icon: Package },
   { id: 'media', label: 'Media', icon: Film },
   { id: 'categories', label: 'Categories', icon: ShoppingBag },
+  { id: 'pages', label: 'Pages', icon: FileText },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'subscriptions', label: 'Plans', icon: Crown },
   { id: 'ai', label: 'AI Config', icon: Bot },
@@ -91,6 +92,7 @@ export default function Admin() {
         {activeTab === 'products' && <ProductsTab />}
         {activeTab === 'media' && <MediaTab />}
         {activeTab === 'categories' && <CategoriesTab />}
+        {activeTab === 'pages' && <PagesTab />}
         {activeTab === 'users' && <UsersTab />}
         {activeTab === 'subscriptions' && <SubscriptionsTab />}
         {activeTab === 'ai' && <AiConfigTab />}
@@ -416,6 +418,134 @@ function SubscriptionsTab() {
                 {plan.features?.map((f, i) => <li key={i} className="text-sm text-gray-400">• {f}</li>)}
               </ul>
               <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(plan.id)}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PagesTab() {
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useQuery({ queryKey: ['admin-pages'], queryFn: adminListPages });
+  const [showForm, setShowForm] = useState(false);
+  const [editingPage, setEditingPage] = useState(null);
+  const [form, setForm] = useState({ title: '', slug: '', content: '', contentType: 'markdown', isPublished: false });
+
+  React.useEffect(() => {
+    if (editingPage) {
+      setForm({
+        title: editingPage.title || '',
+        slug: editingPage.slug || '',
+        content: editingPage.content || '',
+        contentType: editingPage.contentType || 'markdown',
+        isPublished: !!editingPage.isPublished,
+      });
+      setShowForm(true);
+    }
+  }, [editingPage]);
+
+  const createMutation = useMutation({
+    mutationFn: adminCreatePage,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['admin-pages']);
+      setShowForm(false);
+      setEditingPage(null);
+      setForm({ title: '', slug: '', content: '', contentType: 'markdown', isPublished: false });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data) => adminUpdatePage(editingPage?.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['admin-pages']);
+      setShowForm(false);
+      setEditingPage(null);
+      setForm({ title: '', slug: '', content: '', contentType: 'markdown', isPublished: false });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: adminDeletePage,
+    onSuccess: () => {
+      queryClient.invalidateQueries(['admin-pages']);
+      if (editingPage) setEditingPage(null);
+    },
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const payload = {
+      title: form.title,
+      slug: form.slug,
+      content: form.content,
+      contentType: form.contentType,
+      isPublished: form.isPublished,
+    };
+    if (editingPage) {
+      updateMutation.mutate(payload);
+    } else {
+      createMutation.mutate(payload);
+    }
+  };
+
+  const handleEdit = (page) => {
+    setEditingPage(page);
+  };
+
+  const handleCancel = () => {
+    setEditingPage(null);
+    setShowForm(false);
+    setForm({ title: '', slug: '', content: '', contentType: 'markdown', isPublished: false });
+  };
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-semibold">Pages ({data?.pages?.length || 0})</h3>
+        <Button size="sm" onClick={() => { setShowForm(!showForm); setEditingPage(null); }}>
+          <Plus className="w-4 h-4 mr-2" />{showForm ? 'Cancel' : 'Add Page'}
+        </Button>
+      </div>
+
+      {showForm && (
+        <Card className="mb-6">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><Label>Title</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} required /></div>
+            <div><Label>Slug</Label><Input value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} required /></div>
+            <div>
+              <Label>Content Type</Label>
+              <select value={form.contentType} onChange={e => setForm({ ...form, contentType: e.target.value })} className="w-full h-12 rounded-xl bg-black/20 border border-white/10 px-4 text-white">
+                <option value="markdown">Markdown</option>
+                <option value="html">HTML</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2"><input type="checkbox" checked={form.isPublished} onChange={e => setForm({ ...form, isPublished: e.target.checked })} /><span className="text-sm text-gray-400">Published</span></div>
+            <div className="md:col-span-2"><Label>Content</Label><textarea value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} rows={10} className="w-full rounded-xl bg-black/20 border border-white/10 p-4 text-white text-sm" /></div>
+            <div className="md:col-span-2 flex gap-2">
+              <Button type="submit" isLoading={createMutation.isPending || updateMutation.isPending}>{editingPage ? 'Update Page' : 'Create Page'}</Button>
+              {editingPage && <Button variant="glass" type="button" onClick={handleCancel}>Cancel</Button>}
+            </div>
+          </form>
+        </Card>
+      )}
+
+      {isLoading ? <Spinner /> : (
+        <div className="space-y-3">
+          {(data?.pages || []).map(page => (
+            <Card key={page.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white font-semibold">{page.title}</span>
+                  {page.isPublished ? <Badge variant="success">Published</Badge> : <Badge variant="outline">Draft</Badge>}
+                </div>
+                <p className="text-xs text-gray-400">/{page.slug}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="glass" size="sm" onClick={() => handleEdit(page)}>Edit</Button>
+                <Button variant="destructive" size="sm" onClick={() => deleteMutation.mutate(page.id)}>Delete</Button>
+              </div>
             </Card>
           ))}
         </div>

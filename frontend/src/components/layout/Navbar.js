@@ -29,11 +29,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group" data-testid="logo-link">
-            <img 
-              src="/images/logo.png" 
-              alt="Trade Sovereign" 
-              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
-            />
+            <div className="logo-3d-container">
+              <img 
+                src="/images/logo.png" 
+                alt="Trade Sovereign" 
+                className="w-10 h-10 object-contain logo-3d-small"
+              />
+            </div>
             <span className="font-display font-bold text-xl text-white hidden sm:block">
               Trade Sovereign
             </span>

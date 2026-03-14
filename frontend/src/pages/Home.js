@@ -38,11 +38,13 @@ export default function Home() {
             >
               {/* Logo */}
               <div className="flex justify-center mb-8">
-                <img 
-                  src="/images/logo.png" 
-                  alt="Trade Sovereign" 
-                  className="w-24 h-24 object-contain"
-                />
+                <div className="logo-3d-container">
+                  <img 
+                    src="/images/logo.png" 
+                    alt="Trade Sovereign" 
+                    className="w-28 h-28 object-contain logo-hero-3d"
+                  />
+                </div>
               </div>
 
               {/* Badge */}

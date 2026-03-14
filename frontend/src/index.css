@@ -175,3 +175,88 @@ h1, h2, h3, h4, h5, h6 {
 .border-gradient {
   border-image: linear-gradient(135deg, rgba(0, 240, 255, 0.5), rgba(112, 0, 255, 0.5)) 1;
 }
+
+/* 3D Logo Animation - Like Emergent */
+.logo-3d-container {
+  perspective: 1000px;
+  display: inline-block;
+}
+
+.logo-3d {
+  transform-style: preserve-3d;
+  animation: logo-rotate-3d 8s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4));
+}
+
+.logo-3d:hover {
+  animation-play-state: paused;
+  filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.6));
+}
+
+@keyframes logo-rotate-3d {
+  0%, 100% {
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  25% {
+    transform: rotateY(15deg) rotateX(5deg);
+  }
+  50% {
+    transform: rotateY(0deg) rotateX(0deg);
+  }
+  75% {
+    transform: rotateY(-15deg) rotateX(-5deg);
+  }
+}
+
+/* Navbar 3D Logo */
+.logo-3d-small {
+  transform-style: preserve-3d;
+  animation: logo-spin-3d 6s linear infinite;
+  filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+  transition: all 0.3s ease;
+}
+
+.logo-3d-small:hover {
+  animation-play-state: paused;
+  filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
+  transform: scale(1.1) rotateY(180deg);
+}
+
+@keyframes logo-spin-3d {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* Hero Logo Floating */
+.logo-hero-3d {
+  transform-style: preserve-3d;
+  animation: logo-hero-float 4s ease-in-out infinite, logo-hero-glow 3s ease-in-out infinite;
+}
+
+@keyframes logo-hero-float {
+  0%, 100% {
+    transform: translateY(0) rotateY(0deg) rotateX(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotateY(10deg) rotateX(5deg);
+  }
+  50% {
+    transform: translateY(-5px) rotateY(0deg) rotateX(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotateY(-10deg) rotateX(-5deg);
+  }
+}
+
+@keyframes logo-hero-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.4)) drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.6)) drop-shadow(0 15px 40px rgba(0, 0, 0, 0.5));
+  }
+}

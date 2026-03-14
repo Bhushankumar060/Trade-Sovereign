@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.4.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "postcss": "^8.4.32",
     "autoprefixer": "^10.4.16",
     "@types/react": "^18.2.45",

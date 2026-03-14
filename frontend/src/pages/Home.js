@@ -18,12 +18,15 @@ export default function Home() {
   return (
     <AppLayout>
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        {/* Animated Background */}
+      <section className="relative pt-8 pb-32 overflow-hidden">
+        {/* Banner Image */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]" />
+          <img 
+            src="/images/banner.png" 
+            alt="Trade Sovereign Banner" 
+            className="w-full h-full object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#070b14]/60 via-[#070b14]/80 to-[#070b14]" />
         </div>
 
         <div className="container mx-auto px-4 relative z-10">
@@ -33,6 +36,15 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
+              {/* Logo */}
+              <div className="flex justify-center mb-8">
+                <img 
+                  src="/images/logo.png" 
+                  alt="Trade Sovereign" 
+                  className="w-24 h-24 object-contain"
+                />
+              </div>
+
               {/* Badge */}
               <div className="inline-flex items-center gap-2 py-2 px-4 rounded-full bg-cyan-400/10 border border-cyan-400/20 text-cyan-400 text-sm font-semibold mb-8">
                 <Sparkles className="w-4 h-4" />

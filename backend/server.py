@@ -1443,6 +1443,329 @@ async def update_my_trader_profile(bio: str = "", user = Depends(get_current_use
         raise HTTPException(status_code=404, detail="Not a registered trader")
     return {"success": True}
 
+# ===== Automated Trade Execution =====
+class BrokerConnection(BaseModel):
+    broker: Literal["zerodha", "upstox", "angelone", "groww", "demo"]
+    apiKey: Optional[str] = None
+    apiSecret: Optional[str] = None
+    accessToken: Optional[str] = None
+
+class AutoExecutionSettings(BaseModel):
+    enabled: bool = False
+    maxTradeSize: float = 1000
+    riskPerTrade: float = 2.0  # percentage
+    autoStopLoss: bool = True
+    confirmBeforeExecute: bool = True
+
+class ExecuteTradeRequest(BaseModel):
+    signalId: str
+    quantity: Optional[int] = None
+    customEntryPrice: Optional[float] = None
+
+@app.post("/api/broker/connect")
+async def connect_broker(req: BrokerConnection, user = Depends(get_current_user)):
+    """Connect a broker account for automated trading"""
+    # Check if already connected
+    existing = await db.broker_connections.find_one({"user_id": user["id"]})
+    
+    broker_doc = {
+        "user_id": user["id"],
+        "broker": req.broker,
+        "api_key": req.apiKey,
+        "api_secret": req.apiSecret,
+        "access_token": req.accessToken,
+        "status": "connected" if req.broker == "demo" else "pending_verification",
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    if existing:
+        await db.broker_connections.update_one(
+            {"user_id": user["id"]},
+            {"$set": broker_doc}
+        )
+    else:
+        await db.broker_connections.insert_one(broker_doc)
+    
+    return {
+        "success": True,
+        "broker": req.broker,
+        "status": broker_doc["status"],
+        "message": f"Connected to {req.broker}" if req.broker == "demo" else f"Broker {req.broker} pending verification"
+    }
+
+@app.get("/api/broker/status")
+async def get_broker_status(user = Depends(get_current_user)):
+    """Get broker connection status"""
+    connection = await db.broker_connections.find_one({"user_id": user["id"]})
+    if not connection:
+        return {"connected": False, "broker": None}
+    
+    return {
+        "connected": connection.get("status") == "connected",
+        "broker": connection.get("broker"),
+        "status": connection.get("status"),
+        "connectedAt": connection.get("created_at").isoformat() if connection.get("created_at") else None
+    }
+
+@app.delete("/api/broker/disconnect")
+async def disconnect_broker(user = Depends(get_current_user)):
+    """Disconnect broker account"""
+    result = await db.broker_connections.delete_one({"user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="No broker connected")
+    return {"success": True, "message": "Broker disconnected"}
+
+@app.get("/api/auto-execution/settings")
+async def get_auto_execution_settings(user = Depends(get_current_user)):
+    """Get auto execution settings"""
+    settings = await db.auto_execution_settings.find_one({"user_id": user["id"]})
+    if not settings:
+        return {
+            "enabled": False,
+            "maxTradeSize": 1000,
+            "riskPerTrade": 2.0,
+            "autoStopLoss": True,
+            "confirmBeforeExecute": True
+        }
+    
+    return {
+        "enabled": settings.get("enabled", False),
+        "maxTradeSize": settings.get("max_trade_size", 1000),
+        "riskPerTrade": settings.get("risk_per_trade", 2.0),
+        "autoStopLoss": settings.get("auto_stop_loss", True),
+        "confirmBeforeExecute": settings.get("confirm_before_execute", True)
+    }
+
+@app.put("/api/auto-execution/settings")
+async def update_auto_execution_settings(req: AutoExecutionSettings, user = Depends(get_current_user)):
+    """Update auto execution settings"""
+    # Check broker connection
+    broker = await db.broker_connections.find_one({"user_id": user["id"], "status": "connected"})
+    if not broker and req.enabled:
+        raise HTTPException(status_code=400, detail="Connect a broker first to enable auto execution")
+    
+    settings_doc = {
+        "user_id": user["id"],
+        "enabled": req.enabled,
+        "max_trade_size": req.maxTradeSize,
+        "risk_per_trade": req.riskPerTrade,
+        "auto_stop_loss": req.autoStopLoss,
+        "confirm_before_execute": req.confirmBeforeExecute,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.auto_execution_settings.update_one(
+        {"user_id": user["id"]},
+        {"$set": settings_doc},
+        upsert=True
+    )
+    
+    return {"success": True, "message": "Settings updated"}
+
+@app.post("/api/auto-execution/execute")
+async def execute_trade(req: ExecuteTradeRequest, user = Depends(get_current_user)):
+    """Execute a trade signal"""
+    from bson.errors import InvalidId
+    
+    # Verify broker connection
+    broker = await db.broker_connections.find_one({"user_id": user["id"], "status": "connected"})
+    if not broker:
+        raise HTTPException(status_code=400, detail="No broker connected")
+    
+    # Get signal
+    try:
+        signal = await db.trade_signals.find_one({"_id": ObjectId(req.signalId)})
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid signal ID")
+    
+    if not signal:
+        raise HTTPException(status_code=404, detail="Signal not found")
+    
+    # Get settings
+    settings = await db.auto_execution_settings.find_one({"user_id": user["id"]})
+    max_size = settings.get("max_trade_size", 1000) if settings else 1000
+    
+    # Calculate quantity
+    entry_price = req.customEntryPrice or signal.get("entry_price", 0)
+    quantity = req.quantity or int(max_size / entry_price) if entry_price > 0 else 0
+    
+    if quantity <= 0:
+        raise HTTPException(status_code=400, detail="Invalid quantity calculated")
+    
+    # Create execution record
+    execution_doc = {
+        "user_id": user["id"],
+        "signal_id": req.signalId,
+        "broker": broker.get("broker"),
+        "symbol": signal.get("symbol"),
+        "action": signal.get("action"),
+        "quantity": quantity,
+        "entry_price": entry_price,
+        "target_price": signal.get("target_price"),
+        "stop_loss": signal.get("stop_loss"),
+        "status": "executed" if broker.get("broker") == "demo" else "pending",
+        "executed_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.trade_executions.insert_one(execution_doc)
+    
+    # Update copy relationship stats
+    trader_id = signal.get("trader_id")
+    if trader_id:
+        await db.copy_relationships.update_one(
+            {"copier_id": user["id"], "trader_id": trader_id, "status": "active"},
+            {"$inc": {"total_copied_trades": 1}}
+        )
+    
+    return {
+        "success": True,
+        "executionId": str(result.inserted_id),
+        "symbol": signal.get("symbol"),
+        "action": signal.get("action"),
+        "quantity": quantity,
+        "entryPrice": entry_price,
+        "status": execution_doc["status"],
+        "message": f"Trade {'executed' if broker.get('broker') == 'demo' else 'submitted'} successfully"
+    }
+
+@app.get("/api/auto-execution/history")
+async def get_execution_history(page: int = 1, limit: int = 20, user = Depends(get_current_user)):
+    """Get trade execution history"""
+    skip = (page - 1) * limit
+    executions = await db.trade_executions.find({"user_id": user["id"]}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.trade_executions.count_documents({"user_id": user["id"]})
+    
+    result = []
+    for e in executions:
+        result.append({
+            "id": str(e.pop("_id")),
+            "signalId": e.get("signal_id"),
+            "broker": e.get("broker"),
+            "symbol": e.get("symbol"),
+            "action": e.get("action"),
+            "quantity": e.get("quantity"),
+            "entryPrice": e.get("entry_price"),
+            "targetPrice": e.get("target_price"),
+            "stopLoss": e.get("stop_loss"),
+            "status": e.get("status"),
+            "executedAt": e.get("executed_at").isoformat() if e.get("executed_at") else None,
+            "createdAt": e.get("created_at").isoformat() if e.get("created_at") else None
+        })
+    
+    return {"executions": result, "total": total, "page": page, "limit": limit}
+
+@app.get("/api/auto-execution/pending")
+async def get_pending_signals(user = Depends(get_current_user)):
+    """Get pending signals from copied traders that haven't been executed"""
+    # Get active copy relationships
+    copies = await db.copy_relationships.find({
+        "copier_id": user["id"],
+        "status": "active"
+    }).to_list(50)
+    
+    if not copies:
+        return {"signals": []}
+    
+    trader_ids = [c["trader_id"] for c in copies]
+    
+    # Get signals from copied traders
+    signals = await db.trade_signals.find({
+        "trader_id": {"$in": trader_ids},
+        "status": "active"
+    }).sort("created_at", -1).limit(20).to_list(20)
+    
+    # Get already executed signals
+    executed = await db.trade_executions.find({"user_id": user["id"]}).to_list(1000)
+    executed_signal_ids = {e.get("signal_id") for e in executed}
+    
+    # Filter out already executed
+    pending = []
+    for s in signals:
+        signal_id = str(s["_id"])
+        if signal_id not in executed_signal_ids:
+            # Get trader info
+            trader = await db.traders.find_one({"_id": ObjectId(s["trader_id"])})
+            pending.append({
+                "id": signal_id,
+                "traderId": s.get("trader_id"),
+                "traderName": trader.get("display_name", "Trader") if trader else "Unknown",
+                "symbol": s.get("symbol"),
+                "action": s.get("action"),
+                "entryPrice": s.get("entry_price"),
+                "targetPrice": s.get("target_price"),
+                "stopLoss": s.get("stop_loss"),
+                "confidence": s.get("confidence"),
+                "notes": s.get("notes"),
+                "createdAt": s.get("created_at").isoformat() if s.get("created_at") else None
+            })
+    
+    return {"signals": pending}
+
+@app.post("/api/auto-execution/execute-all-pending")
+async def execute_all_pending(user = Depends(get_current_user)):
+    """Execute all pending signals from copied traders"""
+    # Get settings
+    settings = await db.auto_execution_settings.find_one({"user_id": user["id"]})
+    if not settings or not settings.get("enabled"):
+        raise HTTPException(status_code=400, detail="Auto execution is not enabled")
+    
+    # Get broker
+    broker = await db.broker_connections.find_one({"user_id": user["id"], "status": "connected"})
+    if not broker:
+        raise HTTPException(status_code=400, detail="No broker connected")
+    
+    # Get pending signals
+    pending_response = await get_pending_signals(user)
+    pending = pending_response.get("signals", [])
+    
+    if not pending:
+        return {"success": True, "executed": 0, "message": "No pending signals to execute"}
+    
+    executed_count = 0
+    max_size = settings.get("max_trade_size", 1000)
+    
+    for signal in pending:
+        entry_price = signal.get("entryPrice", 0)
+        if entry_price <= 0:
+            continue
+            
+        quantity = int(max_size / entry_price)
+        if quantity <= 0:
+            continue
+        
+        execution_doc = {
+            "user_id": user["id"],
+            "signal_id": signal["id"],
+            "broker": broker.get("broker"),
+            "symbol": signal.get("symbol"),
+            "action": signal.get("action"),
+            "quantity": quantity,
+            "entry_price": entry_price,
+            "target_price": signal.get("targetPrice"),
+            "stop_loss": signal.get("stopLoss"),
+            "status": "executed" if broker.get("broker") == "demo" else "pending",
+            "executed_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await db.trade_executions.insert_one(execution_doc)
+        executed_count += 1
+        
+        # Update copy relationship
+        if signal.get("traderId"):
+            await db.copy_relationships.update_one(
+                {"copier_id": user["id"], "trader_id": signal["traderId"], "status": "active"},
+                {"$inc": {"total_copied_trades": 1}}
+            )
+    
+    return {
+        "success": True,
+        "executed": executed_count,
+        "message": f"Executed {executed_count} trades"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

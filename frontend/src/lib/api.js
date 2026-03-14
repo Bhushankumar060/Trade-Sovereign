@@ -93,4 +93,15 @@ export const getMyCopies = () => api.get('/api/copy-trading/my-copies').then(r =
 export const getMyTraderProfile = () => api.get('/api/copy-trading/my-trader-profile').then(r => r.data);
 export const updateMyTraderProfile = (data) => api.put('/api/copy-trading/my-trader-profile', data).then(r => r.data);
 
+// Auto Execution
+export const connectBroker = (data) => api.post('/api/broker/connect', data).then(r => r.data);
+export const getBrokerStatus = () => api.get('/api/broker/status').then(r => r.data);
+export const disconnectBroker = () => api.delete('/api/broker/disconnect').then(r => r.data);
+export const getAutoExecutionSettings = () => api.get('/api/auto-execution/settings').then(r => r.data);
+export const updateAutoExecutionSettings = (data) => api.put('/api/auto-execution/settings', data).then(r => r.data);
+export const executeTrade = (data) => api.post('/api/auto-execution/execute', data).then(r => r.data);
+export const getExecutionHistory = (params) => api.get('/api/auto-execution/history', { params }).then(r => r.data);
+export const getPendingSignals = () => api.get('/api/auto-execution/pending').then(r => r.data);
+export const executeAllPending = () => api.post('/api/auto-execution/execute-all-pending').then(r => r.data);
+
 export default api;

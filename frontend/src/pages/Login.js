@@ -60,9 +60,11 @@ export default function Login() {
 
             <div className="relative z-10">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                  <span className="text-black font-bold text-2xl">TS</span>
-                </div>
+                <img 
+                  src="/images/logo.png" 
+                  alt="Trade Sovereign" 
+                  className="w-16 h-16 mx-auto mb-4"
+                />
                 <h1 className="text-2xl font-display font-bold">Welcome Back</h1>
                 <p className="text-gray-400 mt-2">Sign in to Trade Sovereign</p>
               </div>

@@ -6,7 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { Button, Badge } from '../ui/DesignSystem';
 import {
   Menu, X, ShoppingCart, User, LogOut, LayoutDashboard,
-  Store, Film, MessageSquare, Crown, Gift, Package, Shield, Copy
+  Store, Film, MessageSquare, Crown, Gift, Package, Shield, Copy, Zap
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -18,9 +18,9 @@ export default function Navbar() {
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/copy-trading', label: 'Copy Trade', icon: Copy },
+    { href: '/auto-execution', label: 'Auto Execute', icon: Zap },
     { href: '/marketplace', label: 'Store', icon: Store },
-    { href: '/chat', label: 'AI Chat', icon: MessageSquare },
-    { href: '/rewards', label: 'Rewards', icon: Gift },
+    { href: '/chat', label: 'AI', icon: MessageSquare },
   ];
 
   return (
@@ -29,9 +29,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group" data-testid="logo-link">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
-              <span className="text-black font-bold">TS</span>
-            </div>
+            <img 
+              src="/images/logo.png" 
+              alt="Trade Sovereign" 
+              className="w-10 h-10 object-contain group-hover:scale-105 transition-transform"
+            />
             <span className="font-display font-bold text-xl text-white hidden sm:block">
               Trade Sovereign
             </span>

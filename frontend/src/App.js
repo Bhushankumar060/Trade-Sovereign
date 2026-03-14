@@ -19,6 +19,7 @@ import Orders from './pages/Orders';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
 import CopyTrading from './pages/CopyTrading';
+import AutoExecution from './pages/AutoExecution';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ function App() {
               <Route path="/media" element={<MediaStore />} />
               <Route path="/chat" element={<AiChat />} />
               <Route path="/copy-trading" element={<CopyTrading />} />
+              <Route path="/auto-execution" element={<AutoExecution />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/rewards" element={<Rewards />} />
               <Route path="/orders" element={<Orders />} />

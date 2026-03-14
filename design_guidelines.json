@@ -1,0 +1,172 @@
+{
+  "project_name": "Trade Sovereign",
+  "theme": "dark",
+  "design_philosophy": {
+    "identity": "The Anti-AI Designer",
+    "core_principles": [
+      "Fusion over Imitation: Mix Fintech precision with Cyberpunk aesthetics.",
+      "Emotion First: Trading is adrenaline. The UI must feel 'live' and 'electric'.",
+      "Content is King: Data is the hero. Charts and numbers must pop against the dark void.",
+      "Zoom In: Focus on the tick-by-tick movements.",
+      "Negative Space: Use deep black voids to separate dense data clusters.",
+      "Contrast: Neon signals against Deep Obsidian backgrounds."
+    ],
+    "anti_patterns": [
+      "No 'Purple/Teal' generic SaaS gradients.",
+      "No 'Inter' for headings. Use 'Outfit' or 'Unbounded'.",
+      "No Center-Everything. Use asymmetrical grids.",
+      "No Flat Gray Cards. Use Glassmorphism and layered depth."
+    ]
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Outfit, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-5xl md:text-7xl font-bold tracking-tight",
+      "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+      "h3": "text-2xl md:text-3xl font-medium",
+      "body": "text-base leading-relaxed text-muted-foreground",
+      "caption": "text-xs tracking-wider uppercase text-muted-foreground/70"
+    },
+    "rules": [
+      "Use 'Outfit' for all Headings (h1-h6).",
+      "Use 'JetBrains Mono' for all financial data (prices, tickers, percentages).",
+      "Use 'Inter' for long-form text and UI labels.",
+      "Headings > 32px must use 'tracking-tight'."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "background": "#050A14",
+      "foreground": "#FFFFFF",
+      "primary": "#00F0FF",
+      "secondary": "#1A2333",
+      "accent": "#7000FF",
+      "success": "#00FF94",
+      "warning": "#FFD600",
+      "danger": "#FF2E2E",
+      "muted": "#94A3B8",
+      "border": "rgba(255, 255, 255, 0.08)"
+    },
+    "gradients": {
+      "primary": "linear-gradient(135deg, #00F0FF 0%, #0080FF 100%)",
+      "glow": "radial-gradient(circle at center, rgba(0, 240, 255, 0.15) 0%, transparent 70%)",
+      "glass": "linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)"
+    },
+    "rules": [
+      "Background is Deep Obsidian (#050A14), not pure black.",
+      "Primary Color (#00F0FF) is for 'Active' states and key CTAs only.",
+      "Use 'Success Neon' (#00FF94) for profit indicators.",
+      "Use 'Danger Neon' (#FF2E2E) for loss indicators.",
+      "Borders are subtle (1px, 8% opacity white) unless hovered."
+    ]
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "default": "bg-white/5 backdrop-blur-xl border border-white/10 shadow-lg",
+      "heavy": "bg-[#0A0F1C]/80 backdrop-blur-2xl border border-white/5 shadow-2xl",
+      "card": "bg-card/40 backdrop-blur-md border border-white/5 hover:border-primary/50 transition-colors duration-300"
+    },
+    "borders": {
+      "tracing_beam": "relative overflow-hidden before:absolute before:inset-0 before:p-[1px] before:bg-gradient-to-r before:from-transparent before:via-primary/50 before:to-transparent before:animate-border-trace",
+      "neon_edge": "border border-primary/50 shadow-[0_0_10px_rgba(0,240,255,0.3)]"
+    },
+    "shadows": {
+      "neon": "shadow-[0_0_20px_rgba(0,240,255,0.15)]",
+      "depth": "shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+    }
+  },
+  "layout": {
+    "grid_system": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 p-4 md:p-6",
+      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12"
+    },
+    "spacing": {
+      "container_padding": "p-4 md:p-8",
+      "section_gap": "gap-8 md:gap-16"
+    },
+    "bento_grid": {
+      "hero": "col-span-full md:col-span-8 row-span-2",
+      "sidebar": "col-span-full md:col-span-4 row-span-2",
+      "card": "col-span-full md:col-span-4"
+    }
+  },
+  "components": {
+    "Button": {
+      "path": "@/components/ui/button",
+      "styles": "rounded-none skew-x-[-10deg] uppercase tracking-wider font-bold hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] transition-all",
+      "variants": {
+        "primary": "bg-primary text-black hover:bg-primary/90",
+        "glass": "bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 text-white"
+      }
+    },
+    "Card": {
+      "path": "@/components/ui/card",
+      "styles": "rounded-xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl overflow-hidden relative group"
+    },
+    "Input": {
+      "path": "@/components/ui/input",
+      "styles": "bg-white/5 border-white/10 focus:border-primary/50 focus:ring-primary/20 rounded-lg text-white placeholder:text-white/30"
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "animations": {
+      "fade_in": { "initial": { "opacity": 0, "y": 20 }, "animate": { "opacity": 1, "y": 0 }, "transition": { "duration": 0.5 } },
+      "hover_scale": { "whileHover": { "scale": 1.02 }, "transition": { "duration": 0.2 } },
+      "list_stagger": { "visible": { "transition": { "staggerChildren": 0.05 } } }
+    },
+    "rules": [
+      "Use 'framer-motion' for all entrance animations.",
+      "Use CSS transitions for hover states (color, border, shadow).",
+      "No 'transition: all'. Specify properties.",
+      "Respect 'prefers-reduced-motion'."
+    ]
+  },
+  "assets": {
+    "image_urls": {
+      "hero_backgrounds": [
+        "https://images.unsplash.com/photo-1764258560205-53b523836e8f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwzfHxmdXR1cmlzdGljJTIwM2QlMjBhYnN0cmFjdCUyMGRhcmslMjBiYWNrZ3JvdW5kJTIwYmx1ZSUyMG5lb258ZW58MHx8fHwxNzczNDgzMTA4fDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1762278805645-cdcbd21c0e7f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwyfHxmdXR1cmlzdGljJTIwM2QlMjBhYnN0cmFjdCUyMGRhcmslMjBiYWNrZ3JvdW5kJTIwYmx1ZSUyMG5lb258ZW58MHx8fHwxNzczNDgzMTA4fDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "ai_avatar": [
+        "https://images.unsplash.com/photo-1695902173528-0b15104c4554?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxmdXR1cmlzdGljJTIwcm9ib3QlMjBoZWFkJTIwYXZhdGFyJTIwM2QlMjByZW5kZXIlMjBkYXJrJTIwY3liZXJwdW5rfGVufDB8fHx8MTc3MzQ4MzEwOXww&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1677442135132-141348e809d9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwzfHxmdXR1cmlzdGljJTIwcm9ib3QlMjBoZWFkJTIwYXZhdGFyJTIwM2QlMjByZW5kZXIlMjBkYXJrJTIwY3liZXJwdW5rfGVufDB8fHx8MTc3MzQ4MzEwOXww&ixlib=rb-4.1.0&q=85"
+      ],
+      "placeholders": {
+        "user": "https://avatar.vercel.sh/user",
+        "product": "https://images.unsplash.com/photo-1764258560730-d167e5deda65?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwM2QlMjBhYnN0cmFjdCUyMGRhcmslMjBiYWNrZ3JvdW5kJTIwYmx1ZSUyMG5lb258ZW58MHx8fHwxNzczNDgzMTA4fDA&ixlib=rb-4.1.0&q=85"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-width: 1.5; color: var(--primary);"
+    }
+  },
+  "3d_strategy": {
+    "hero_elements": "Use 'react-three-fiber' for floating 3D coins or abstract data cubes in the hero section.",
+    "charts": "Use 'recharts' but style them with gradients and glow effects (drop-shadow) to mimic 3D depth.",
+    "interactive_globe": "Use 'react-globe.gl' for global market visualization if needed."
+  },
+  "instructions_to_main_agent": [
+    "1. Setup 'Outfit' and 'JetBrains Mono' fonts immediately.",
+    "2. Implement the 'glass-card' and 'glass-panel' utility classes in index.css.",
+    "3. Refactor the Sidebar and Navbar to use the 'Deep Obsidian' glass aesthetic.",
+    "4. For the Dashboard, strictly follow the 'Bento Grid' layout.",
+    "5. Ensure all charts have a neon glow effect.",
+    "6. Use 'sonner' for toasts.",
+    "7. DO NOT use generic white backgrounds. Everything is dark mode by default.",
+    "8. Add 'data-testid' to all interactive elements."
+  ],
+  "universal_guidelines": [
+    "No 'AI slop' aesthetics (generic centered layouts, flat gradients).",
+    "Create depth with z-index and layering.",
+    "Use 2-3x more spacing than usual.",
+    "Every interaction needs a micro-animation.",
+    "Never use pure black (#000000). Use tinted blacks.",
+    "Ensure accessibility (APCA contrast standards)."
+  ]
+}

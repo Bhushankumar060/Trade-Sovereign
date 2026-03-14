@@ -1,0 +1,12 @@
+fastapi==0.109.0
+uvicorn==0.27.0
+motor==3.3.2
+pymongo==4.6.1
+python-dotenv==1.0.0
+pydantic==2.5.3
+firebase-admin==6.4.0
+razorpay==1.4.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+httpx==0.26.0
+resend==2.23.0

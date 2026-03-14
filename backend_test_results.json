@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-03-14T10:42:34.266070",
+  "total_tests": 18,
+  "passed_tests": 2,
+  "failed_tests": 16,
+  "success_rate": 11.11111111111111,
+  "failures": [
+    "Health Check: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Categories List: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Products List: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Media List: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Subscription Plans: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "AI Search: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Pages List: Status: 404, Expected: 200, Response: {'error': 'Route not found'}",
+    "Profile (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "Orders (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "AI Chat (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "Admin Stats (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "Admin Products (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "Admin Users (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "Admin Analytics (No Auth) - Should Fail: Status: 404, Expected: 401, Response: {'error': 'Route not found'}",
+    "CORS Headers: Missing CORS headers",
+    "Invalid Product ID: Status: 404, Expected: 400, Response: {'error': 'Route not found'}"
+  ]
+}

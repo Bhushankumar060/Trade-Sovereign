@@ -11,7 +11,7 @@ marked.setOptions({ gfm: true, breaks: true });
 export default function DynamicPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
-  const { data: page, isLoading, isError } = useGetPage({ slug });
+  const { data: page, isLoading, isError } = useGetPage(slug ?? "");
 
   const htmlContent = useMemo(() => {
     if (!page) return "";

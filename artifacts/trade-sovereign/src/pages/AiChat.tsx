@@ -60,7 +60,7 @@ export default function AiChat() {
   const [selectedConvId, setSelectedConvId] = useState<string | null>(null);
 
   const chatMutation = useAiChat();
-  const { data: convsData, refetch: refetchConvs } = useListConversations({ query: { enabled: !!user } });
+    const { data: convsData, refetch: refetchConvs } = useListConversations({ query: { queryKey: ["conversations"], enabled: !!user } });
   const saveConv = useSaveConversation();
   const deleteConv = useDeleteConversation();
 

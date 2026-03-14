@@ -45,7 +45,7 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 
 router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    const items = await db.select().from(mediaTable).where(eq(mediaTable.id, req.params.id)).limit(1);
+    const items = await db.select().from(mediaTable).where(eq(mediaTable.id, String(req.params.id))).limit(1);
     if (items.length === 0) {
       res.status(404).json({ error: "Not found", message: "Media item not found" });
       return;
@@ -59,7 +59,7 @@ router.get("/:id", async (req: Request, res: Response): Promise<void> => {
 
 router.get("/:id/download", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const items = await db.select().from(mediaTable).where(eq(mediaTable.id, req.params.id)).limit(1);
+    const items = await db.select().from(mediaTable).where(eq(mediaTable.id, String(req.params.id))).limit(1);
     if (items.length === 0) {
       res.status(404).json({ error: "Not found", message: "Media item not found" });
       return;
@@ -72,7 +72,7 @@ router.get("/:id/download", authenticate, async (req: AuthRequest, res: Response
     const purchased = orders.some(order => {
       if (order.status !== "paid") return false;
       const items = order.items as Array<{ id: string; type: string }>;
-      return items.some(item => item.id === req.params.id && item.type === "media");
+      return items.some(item => item.id === String(req.params.id) && item.type === "media");
     });
 
     if (!purchased && req.userRole !== "admin") {

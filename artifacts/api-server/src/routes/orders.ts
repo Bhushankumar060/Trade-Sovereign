@@ -35,7 +35,7 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response): Promise<v
 router.get("/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const orders = await db.select().from(ordersTable)
-      .where(eq(ordersTable.id, req.params.id))
+      .where(eq(ordersTable.id, String(req.params.id)))
       .limit(1);
     if (orders.length === 0) {
       res.status(404).json({ error: "Not found", message: "Order not found" });

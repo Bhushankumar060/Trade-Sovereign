@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Dict, List, Any
 
 class TradeSovereignAPITester:
-    def __init__(self, base_url="https://demobackend.emergentagent.com"):
+    def __init__(self, base_url="http://localhost:8001"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
@@ -142,6 +142,56 @@ class TradeSovereignAPITester:
             print(f"   Found {len(plans)} subscription plans")
             return True
         return False
+
+    def test_copy_trading_endpoints(self):
+        """Test copy trading endpoints"""
+        print("\n🔍 Testing Copy Trading...")
+        
+        # Test list traders
+        success1, response1 = self.run_test(
+            "Copy Trading - List Traders",
+            "GET",
+            "api/copy-trading/traders",
+            200
+        )
+        if success1:
+            traders = response1.get("traders", [])
+            print(f"   Found {len(traders)} traders")
+        
+        # Test list signals  
+        success2, response2 = self.run_test(
+            "Copy Trading - List Signals",
+            "GET",
+            "api/copy-trading/signals",
+            200
+        )
+        if success2:
+            signals = response2.get("signals", [])
+            print(f"   Found {len(signals)} signals")
+        
+        # Test become trader without auth (should fail)
+        success3, response3 = self.run_test(
+            "Become Trader (No Auth) - Should Fail",
+            "POST",
+            "api/copy-trading/become-trader",
+            401
+        )
+        
+        # Test create signal without auth (should fail)
+        success4, response4 = self.run_test(
+            "Create Signal (No Auth) - Should Fail", 
+            "POST",
+            "api/copy-trading/signals",
+            401,
+            data={
+                "symbol": "BTC",
+                "action": "buy", 
+                "entryPrice": 50000.0,
+                "confidence": 80
+            }
+        )
+        
+        return success1 and success2 and success3 and success4
 
     def test_unauthenticated_endpoints(self):
         """Test endpoints that should work without authentication"""
@@ -281,6 +331,7 @@ class TradeSovereignAPITester:
             ("Products", self.test_products_list), 
             ("Media", self.test_media_list),
             ("Subscription Plans", self.test_subscription_plans),
+            ("Copy Trading Endpoints", self.test_copy_trading_endpoints),
             ("Unauthenticated Endpoints", self.test_unauthenticated_endpoints),
             ("Auth Required Endpoints", self.test_auth_required_endpoints),
             ("Admin Endpoints (No Auth)", self.test_admin_endpoints_without_auth),

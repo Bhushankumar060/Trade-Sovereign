@@ -75,6 +75,10 @@ export const adminListPages = () => api.get('/api/admin/pages').then(r => r.data
 export const adminCreatePage = (data) => api.post('/api/admin/pages', data).then(r => r.data);
 export const adminUpdatePage = (id, data) => api.put(`/api/admin/pages/${id}`, data).then(r => r.data);
 export const adminDeletePage = (id) => api.delete(`/api/admin/pages/${id}`).then(r => r.data);
+
+// Public pages (dynamic content)
+export const getPageBySlug = (slug) => api.get(`/api/pages/${slug}`).then(r => r.data);
+
 export const adminGetAiSettings = () => api.get('/api/admin/ai-settings').then(r => r.data);
 export const adminUpdateAiSettings = (data) => api.put('/api/admin/ai-settings', data).then(r => r.data);
 export const adminListSubscriptionPlans = () => api.get('/api/admin/subscription-plans').then(r => r.data);

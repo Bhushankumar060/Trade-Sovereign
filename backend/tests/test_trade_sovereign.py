@@ -2,18 +2,25 @@
 Trade Sovereign Backend API Tests
 Tests for health check, copy trading, broker, auto execution, products, and subscriptions
 """
-import pytest
-import requests
 import os
+import requests
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://trade-sovereign-1.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+USE_REMOTE = bool(BASE_URL)
+
+
+def _get(client, path):
+    if USE_REMOTE:
+        return requests.get(f"{BASE_URL}{path}")
+    return client.get(path)
+
 
 class TestHealthCheck:
     """Health check endpoint tests"""
     
-    def test_healthz_returns_ok(self):
+    def test_healthz_returns_ok(self, client):
         """Test that /api/healthz returns status ok"""
-        response = requests.get(f"{BASE_URL}/api/healthz")
+        response = _get(client, "/api/healthz")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ok"
@@ -22,9 +29,9 @@ class TestHealthCheck:
 class TestCopyTrading:
     """Copy Trading API tests"""
     
-    def test_list_traders_returns_traders(self):
+    def test_list_traders_returns_traders(self, client):
         """Test that /api/copy-trading/traders returns list of traders"""
-        response = requests.get(f"{BASE_URL}/api/copy-trading/traders")
+        response = _get(client, "/api/copy-trading/traders")
         assert response.status_code == 200
         data = response.json()
         assert "traders" in data
@@ -33,9 +40,9 @@ class TestCopyTrading:
         # Should have seeded traders
         assert data["total"] >= 4
         
-    def test_traders_have_required_fields(self):
+    def test_traders_have_required_fields(self, client):
         """Test that traders have all required fields"""
-        response = requests.get(f"{BASE_URL}/api/copy-trading/traders")
+        response = _get(client, "/api/copy-trading/traders")
         data = response.json()
         if data["traders"]:
             trader = data["traders"][0]
@@ -43,9 +50,9 @@ class TestCopyTrading:
             for field in required_fields:
                 assert field in trader, f"Missing field: {field}"
 
-    def test_list_signals_returns_200(self):
+    def test_list_signals_returns_200(self, client):
         """Test that /api/copy-trading/signals returns 200"""
-        response = requests.get(f"{BASE_URL}/api/copy-trading/signals")
+        response = _get(client, "/api/copy-trading/signals")
         assert response.status_code == 200
         data = response.json()
         assert "signals" in data
@@ -54,9 +61,9 @@ class TestCopyTrading:
 class TestBrokerStatus:
     """Broker Status API tests - requires authentication"""
     
-    def test_broker_status_requires_auth(self):
+    def test_broker_status_requires_auth(self, client):
         """Test that /api/broker/status returns 401 without auth"""
-        response = requests.get(f"{BASE_URL}/api/broker/status")
+        response = _get(client, "/api/broker/status")
         assert response.status_code == 401
         data = response.json()
         assert "detail" in data
@@ -65,25 +72,25 @@ class TestBrokerStatus:
 class TestAutoExecution:
     """Auto Execution API tests - requires authentication"""
     
-    def test_auto_execution_settings_requires_auth(self):
+    def test_auto_execution_settings_requires_auth(self, client):
         """Test that /api/auto-execution/settings returns 401 without auth"""
-        response = requests.get(f"{BASE_URL}/api/auto-execution/settings")
+        response = _get(client, "/api/auto-execution/settings")
         assert response.status_code == 401
         data = response.json()
         assert "detail" in data
 
-    def test_pending_signals_requires_auth(self):
+    def test_pending_signals_requires_auth(self, client):
         """Test that /api/auto-execution/pending returns 401 without auth"""
-        response = requests.get(f"{BASE_URL}/api/auto-execution/pending")
+        response = _get(client, "/api/auto-execution/pending")
         assert response.status_code == 401
 
 
 class TestProducts:
     """Products API tests"""
     
-    def test_list_products_returns_products(self):
+    def test_list_products_returns_products(self, client):
         """Test that /api/products returns list of products"""
-        response = requests.get(f"{BASE_URL}/api/products")
+        response = _get(client, "/api/products")
         assert response.status_code == 200
         data = response.json()
         assert "products" in data
@@ -92,9 +99,9 @@ class TestProducts:
         # Should have seeded products
         assert data["total"] >= 4
         
-    def test_products_have_required_fields(self):
+    def test_products_have_required_fields(self, client):
         """Test that products have all required fields"""
-        response = requests.get(f"{BASE_URL}/api/products")
+        response = _get(client, "/api/products")
         data = response.json()
         if data["products"]:
             product = data["products"][0]
@@ -106,9 +113,9 @@ class TestProducts:
 class TestSubscriptions:
     """Subscription Plans API tests"""
     
-    def test_list_subscription_plans(self):
+    def test_list_subscription_plans(self, client):
         """Test that /api/subscriptions/plans returns plans"""
-        response = requests.get(f"{BASE_URL}/api/subscriptions/plans")
+        response = _get(client, "/api/subscriptions/plans")
         assert response.status_code == 200
         data = response.json()
         assert "plans" in data
@@ -116,9 +123,9 @@ class TestSubscriptions:
         # Should have Free, Pro, and Elite plans
         assert len(data["plans"]) >= 3
         
-    def test_subscription_plans_have_required_fields(self):
+    def test_subscription_plans_have_required_fields(self, client):
         """Test that subscription plans have all required fields"""
-        response = requests.get(f"{BASE_URL}/api/subscriptions/plans")
+        response = _get(client, "/api/subscriptions/plans")
         data = response.json()
         if data["plans"]:
             plan = data["plans"][0]
@@ -130,9 +137,9 @@ class TestSubscriptions:
 class TestMedia:
     """Media API tests"""
     
-    def test_list_media_returns_200(self):
+    def test_list_media_returns_200(self, client):
         """Test that /api/media returns 200"""
-        response = requests.get(f"{BASE_URL}/api/media")
+        response = _get(client, "/api/media")
         assert response.status_code == 200
         data = response.json()
         assert "items" in data
@@ -141,9 +148,9 @@ class TestMedia:
 class TestCategories:
     """Categories API tests"""
     
-    def test_list_categories_returns_200(self):
+    def test_list_categories_returns_200(self, client):
         """Test that /api/categories returns 200"""
-        response = requests.get(f"{BASE_URL}/api/categories")
+        response = _get(client, "/api/categories")
         assert response.status_code == 200
         data = response.json()
         assert "categories" in data
@@ -152,9 +159,9 @@ class TestCategories:
 class TestPages:
     """Pages API tests"""
     
-    def test_list_pages_returns_200(self):
+    def test_list_pages_returns_200(self, client):
         """Test that /api/pages returns 200"""
-        response = requests.get(f"{BASE_URL}/api/pages")
+        response = _get(client, "/api/pages")
         assert response.status_code == 200
         data = response.json()
         assert "pages" in data
@@ -163,12 +170,12 @@ class TestPages:
 class TestAdminEndpoints:
     """Admin endpoints require authentication"""
     
-    def test_admin_stats_requires_auth(self):
+    def test_admin_stats_requires_auth(self, client):
         """Test that /api/admin/stats returns 401 without auth"""
-        response = requests.get(f"{BASE_URL}/api/admin/stats")
+        response = _get(client, "/api/admin/stats")
         assert response.status_code == 401
 
-    def test_admin_products_requires_auth(self):
+    def test_admin_products_requires_auth(self, client):
         """Test that /api/admin/products returns 401 without auth"""
-        response = requests.get(f"{BASE_URL}/api/admin/products")
+        response = _get(client, "/api/admin/products")
         assert response.status_code == 401

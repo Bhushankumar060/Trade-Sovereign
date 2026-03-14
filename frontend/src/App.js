@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import MediaStore from './pages/MediaStore';
 import AiChat from './pages/AiChat';
+import Page from './pages/Page';
 import Subscriptions from './pages/Subscriptions';
 import Rewards from './pages/Rewards';
 import Orders from './pages/Orders';
@@ -51,6 +52,7 @@ function App() {
               <Route path="/orders" element={<Orders />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/pages/:slug" element={<Page />} />
             </Routes>
           </Router>
           <Toaster />

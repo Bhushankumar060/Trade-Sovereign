@@ -30,7 +30,7 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
 router.get("/:slug", async (req: Request, res: Response): Promise<void> => {
   try {
     const pages = await db.select().from(pagesTable)
-      .where(eq(pagesTable.slug, req.params.slug))
+      .where(eq(pagesTable.slug, String(req.params.slug)))
       .limit(1);
     if (!pages[0] || !pages[0].isPublished) {
       res.status(404).json({ error: "Not found", message: "Page not found" });

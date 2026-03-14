@@ -123,7 +123,7 @@ export default function CartDrawer() {
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
-                        alt={item.name || item.title}
+                        alt={item.title}
                         className="w-20 h-20 rounded-lg object-cover"
                       />
                     ) : (
@@ -133,7 +133,7 @@ export default function CartDrawer() {
                     )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-white truncate">
-                        {item.name || item.title}
+                        {item.title}
                       </h3>
                       <Badge variant="outline" className="mt-1 text-xs">
                         {item.type}

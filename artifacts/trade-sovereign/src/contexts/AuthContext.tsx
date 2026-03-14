@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch application user profile if firebase auth is present
   const { data: apiUser, isLoading: apiUserLoading } = useGetMe({
     query: {
+      queryKey: ["me"],
       enabled: !!firebaseUser && !loading,
       retry: false,
     }

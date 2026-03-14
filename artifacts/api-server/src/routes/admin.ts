@@ -151,7 +151,7 @@ router.put("/products/:id", async (req: Request, res: Response): Promise<void> =
       ...(imageUrl !== undefined && { imageUrl }),
       ...(isDigital !== undefined && { isDigital }),
       ...(isSubscription !== undefined && { isSubscription }),
-    }).where(eq(productsTable.id, req.params.id)).returning();
+    }).where(eq(productsTable.id, String(req.params.id))).returning();
     if (!updated[0]) { res.status(404).json({ error: "Not found", message: "Product not found" }); return; }
     res.json(mapProduct(updated[0]));
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
@@ -159,7 +159,7 @@ router.put("/products/:id", async (req: Request, res: Response): Promise<void> =
 
 router.delete("/products/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    await db.delete(productsTable).where(eq(productsTable.id, req.params.id));
+    await db.delete(productsTable).where(eq(productsTable.id, String(req.params.id)));
     res.json({ success: true, message: "Product deleted" });
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
 });
@@ -193,7 +193,7 @@ router.put("/users/:id/role", async (req: Request, res: Response): Promise<void>
   try {
     const { role } = req.body;
     if (!["user", "admin"].includes(role)) { res.status(400).json({ error: "Bad request", message: "Invalid role" }); return; }
-    await db.update(usersTable).set({ role }).where(eq(usersTable.id, req.params.id));
+    await db.update(usersTable).set({ role }).where(eq(usersTable.id, String(req.params.id)));
     res.json({ success: true, message: "Role updated" });
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
 });
@@ -219,7 +219,7 @@ router.post("/categories", async (req: Request, res: Response): Promise<void> =>
 router.put("/categories/:id", async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, slug } = req.body;
-    const updated = await db.update(categoriesTable).set({ ...(name && { name }), ...(slug && { slug }) }).where(eq(categoriesTable.id, req.params.id)).returning();
+    const updated = await db.update(categoriesTable).set({ ...(name && { name }), ...(slug && { slug }) }).where(eq(categoriesTable.id, String(req.params.id))).returning();
     if (!updated[0]) { res.status(404).json({ error: "Not found", message: "Category not found" }); return; }
     const c = updated[0];
     res.json({ id: c.id, name: c.name, slug: c.slug, productCount: 0, createdAt: c.createdAt.toISOString() });
@@ -228,7 +228,7 @@ router.put("/categories/:id", async (req: Request, res: Response): Promise<void>
 
 router.delete("/categories/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    await db.delete(categoriesTable).where(eq(categoriesTable.id, req.params.id));
+    await db.delete(categoriesTable).where(eq(categoriesTable.id, String(req.params.id)));
     res.json({ success: true, message: "Category deleted" });
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
 });
@@ -259,7 +259,7 @@ router.put("/pages/:id", async (req: Request, res: Response): Promise<void> => {
       ...(title !== undefined && { title }), ...(slug !== undefined && { slug }),
       ...(content !== undefined && { content }), ...(contentType !== undefined && { contentType }),
       ...(isPublished !== undefined && { isPublished }), updatedAt: now,
-    }).where(eq(pagesTable.id, req.params.id)).returning();
+    }).where(eq(pagesTable.id, String(req.params.id))).returning();
     if (!updated[0]) { res.status(404).json({ error: "Not found", message: "Page not found" }); return; }
     res.json(mapPage(updated[0]));
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
@@ -267,7 +267,7 @@ router.put("/pages/:id", async (req: Request, res: Response): Promise<void> => {
 
 router.delete("/pages/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    await db.delete(pagesTable).where(eq(pagesTable.id, req.params.id));
+    await db.delete(pagesTable).where(eq(pagesTable.id, String(req.params.id)));
     res.json({ success: true, message: "Page deleted" });
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
 });
@@ -321,7 +321,7 @@ router.put("/subscription-plans/:id", async (req: Request, res: Response): Promi
       ...(name !== undefined && { name }), ...(price !== undefined && { price: String(price) }),
       ...(yearlyPrice !== undefined && { yearlyPrice: String(yearlyPrice) }),
       ...(features !== undefined && { features }), ...(isPopular !== undefined && { isPopular }),
-    }).where(eq(subscriptionPlansTable.id, req.params.id)).returning();
+    }).where(eq(subscriptionPlansTable.id, String(req.params.id))).returning();
     if (!updated[0]) { res.status(404).json({ error: "Not found", message: "Plan not found" }); return; }
     res.json(mapPlan(updated[0]));
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
@@ -329,7 +329,7 @@ router.put("/subscription-plans/:id", async (req: Request, res: Response): Promi
 
 router.delete("/subscription-plans/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    await db.delete(subscriptionPlansTable).where(eq(subscriptionPlansTable.id, req.params.id));
+    await db.delete(subscriptionPlansTable).where(eq(subscriptionPlansTable.id, String(req.params.id)));
     res.json({ success: true, message: "Plan deleted" });
   } catch (err) { console.error(err); res.status(500).json({ error: "Internal server error", message: "Failed" }); }
 });

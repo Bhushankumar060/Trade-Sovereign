@@ -81,4 +81,16 @@ export const adminListSubscriptionPlans = () => api.get('/api/admin/subscription
 export const adminCreateSubscriptionPlan = (data) => api.post('/api/admin/subscription-plans', data).then(r => r.data);
 export const adminDeleteSubscriptionPlan = (id) => api.delete(`/api/admin/subscription-plans/${id}`).then(r => r.data);
 
+// Copy Trading
+export const listTraders = (params) => api.get('/api/copy-trading/traders', { params }).then(r => r.data);
+export const getTraderProfile = (id) => api.get(`/api/copy-trading/traders/${id}`).then(r => r.data);
+export const listTradeSignals = (params) => api.get('/api/copy-trading/signals', { params }).then(r => r.data);
+export const becomeTrader = () => api.post('/api/copy-trading/become-trader').then(r => r.data);
+export const createTradeSignal = (data) => api.post('/api/copy-trading/signals', data).then(r => r.data);
+export const copyTrader = (traderId, data) => api.post(`/api/copy-trading/copy/${traderId}`, data).then(r => r.data);
+export const stopCopyingTrader = (traderId) => api.delete(`/api/copy-trading/copy/${traderId}`).then(r => r.data);
+export const getMyCopies = () => api.get('/api/copy-trading/my-copies').then(r => r.data);
+export const getMyTraderProfile = () => api.get('/api/copy-trading/my-trader-profile').then(r => r.data);
+export const updateMyTraderProfile = (data) => api.put('/api/copy-trading/my-trader-profile', data).then(r => r.data);
+
 export default api;

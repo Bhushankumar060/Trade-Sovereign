@@ -6,7 +6,7 @@ import { useCart } from '../../contexts/CartContext';
 import { Button, Badge } from '../ui/DesignSystem';
 import {
   Menu, X, ShoppingCart, User, LogOut, LayoutDashboard,
-  Store, Film, MessageSquare, Crown, Gift, Package, Shield
+  Store, Film, MessageSquare, Crown, Gift, Package, Shield, Copy
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -17,10 +17,9 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/marketplace', label: 'Marketplace', icon: Store },
-    { href: '/media', label: 'Media', icon: Film },
+    { href: '/copy-trading', label: 'Copy Trade', icon: Copy },
+    { href: '/marketplace', label: 'Store', icon: Store },
     { href: '/chat', label: 'AI Chat', icon: MessageSquare },
-    { href: '/subscriptions', label: 'Plans', icon: Crown },
     { href: '/rewards', label: 'Rewards', icon: Gift },
   ];
 

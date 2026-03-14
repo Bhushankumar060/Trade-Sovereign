@@ -1134,6 +1134,315 @@ async def admin_delete_subscription_plan(id: str, admin = Depends(require_admin)
         raise HTTPException(status_code=404, detail="Plan not found")
     return {"success": True, "message": "Plan deleted"}
 
+# ===== Copy Trading =====
+class TraderProfile(BaseModel):
+    userId: str
+    displayName: str
+    bio: Optional[str] = None
+    totalReturn: float = 0
+    winRate: float = 0
+    copiers: int = 0
+    isVerified: bool = False
+
+class CreateTradeSignalRequest(BaseModel):
+    symbol: str
+    action: Literal["buy", "sell"]
+    entryPrice: float
+    targetPrice: Optional[float] = None
+    stopLoss: Optional[float] = None
+    confidence: float = 50
+    notes: Optional[str] = None
+
+class CopyTraderRequest(BaseModel):
+    traderId: str
+    allocation: float = 1000  # Amount to allocate for copy trading
+
+@app.get("/api/copy-trading/traders")
+async def list_traders(
+    sortBy: str = "copiers",
+    page: int = 1,
+    limit: int = 20
+):
+    """List all traders available for copy trading"""
+    sort_field = {"copiers": "copiers", "return": "total_return", "winrate": "win_rate"}.get(sortBy, "copiers")
+    skip = (page - 1) * limit
+    
+    traders = await db.traders.find({"is_public": True}).sort(sort_field, -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.traders.count_documents({"is_public": True})
+    
+    # Serialize traders
+    result = []
+    for t in traders:
+        t["id"] = str(t.pop("_id"))
+        if "user_id" in t:
+            t["userId"] = t.pop("user_id")
+        if "display_name" in t:
+            t["displayName"] = t.pop("display_name")
+        if "total_return" in t:
+            t["totalReturn"] = t.pop("total_return")
+        if "win_rate" in t:
+            t["winRate"] = t.pop("win_rate")
+        if "is_verified" in t:
+            t["isVerified"] = t.pop("is_verified")
+        if "is_public" in t:
+            t["isPublic"] = t.pop("is_public")
+        if "created_at" in t:
+            t["createdAt"] = t.pop("created_at").isoformat() if isinstance(t.get("created_at"), datetime) else str(t.get("created_at", ""))
+        result.append(t)
+    
+    return {"traders": result, "total": total, "page": page, "limit": limit}
+
+@app.get("/api/copy-trading/traders/{id}")
+async def get_trader_profile(id: str):
+    """Get trader profile with stats and recent signals"""
+    from bson.errors import InvalidId
+    try:
+        oid = ObjectId(id)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid trader ID")
+    
+    trader = await db.traders.find_one({"_id": oid})
+    if not trader:
+        raise HTTPException(status_code=404, detail="Trader not found")
+    
+    # Get recent signals
+    signals = await db.trade_signals.find({"trader_id": id}).sort("created_at", -1).limit(10).to_list(10)
+    
+    trader["id"] = str(trader.pop("_id"))
+    if "user_id" in trader:
+        trader["userId"] = trader.pop("user_id")
+    if "display_name" in trader:
+        trader["displayName"] = trader.pop("display_name")
+    if "total_return" in trader:
+        trader["totalReturn"] = trader.pop("total_return")
+    if "win_rate" in trader:
+        trader["winRate"] = trader.pop("win_rate")
+    if "is_verified" in trader:
+        trader["isVerified"] = trader.pop("is_verified")
+    if "created_at" in trader:
+        trader["createdAt"] = trader.pop("created_at").isoformat() if isinstance(trader.get("created_at"), datetime) else ""
+    
+    # Serialize signals
+    serialized_signals = []
+    for s in signals:
+        s["id"] = str(s.pop("_id"))
+        if "trader_id" in s:
+            s["traderId"] = s.pop("trader_id")
+        if "entry_price" in s:
+            s["entryPrice"] = s.pop("entry_price")
+        if "target_price" in s:
+            s["targetPrice"] = s.pop("target_price")
+        if "stop_loss" in s:
+            s["stopLoss"] = s.pop("stop_loss")
+        if "created_at" in s:
+            s["createdAt"] = s.pop("created_at").isoformat() if isinstance(s.get("created_at"), datetime) else ""
+        serialized_signals.append(s)
+    
+    trader["recentSignals"] = serialized_signals
+    return trader
+
+@app.get("/api/copy-trading/signals")
+async def list_trade_signals(traderId: Optional[str] = None, page: int = 1, limit: int = 20):
+    """List trade signals from traders"""
+    query = {}
+    if traderId:
+        query["trader_id"] = traderId
+    
+    skip = (page - 1) * limit
+    signals = await db.trade_signals.find(query).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    total = await db.trade_signals.count_documents(query)
+    
+    result = []
+    for s in signals:
+        s["id"] = str(s.pop("_id"))
+        if "trader_id" in s:
+            s["traderId"] = s.pop("trader_id")
+        if "entry_price" in s:
+            s["entryPrice"] = s.pop("entry_price")
+        if "target_price" in s:
+            s["targetPrice"] = s.pop("target_price")
+        if "stop_loss" in s:
+            s["stopLoss"] = s.pop("stop_loss")
+        if "created_at" in s:
+            s["createdAt"] = s.pop("created_at").isoformat() if isinstance(s.get("created_at"), datetime) else ""
+        result.append(s)
+    
+    return {"signals": result, "total": total}
+
+@app.post("/api/copy-trading/become-trader")
+async def become_trader(user = Depends(get_current_user)):
+    """Register as a trader for copy trading"""
+    # Check if already a trader
+    existing = await db.traders.find_one({"user_id": user["id"]})
+    if existing:
+        raise HTTPException(status_code=400, detail="Already registered as trader")
+    
+    trader_doc = {
+        "user_id": user["id"],
+        "display_name": user.get("display_name") or "Trader",
+        "bio": "",
+        "total_return": 0,
+        "win_rate": 0,
+        "copiers": 0,
+        "total_trades": 0,
+        "winning_trades": 0,
+        "is_verified": False,
+        "is_public": True,
+        "created_at": datetime.now(timezone.utc)
+    }
+    result = await db.traders.insert_one(trader_doc)
+    trader_doc["_id"] = result.inserted_id
+    
+    return {"success": True, "traderId": str(result.inserted_id), "message": "You are now a trader!"}
+
+@app.post("/api/copy-trading/signals")
+async def create_trade_signal(req: CreateTradeSignalRequest, user = Depends(get_current_user)):
+    """Create a new trade signal (for traders)"""
+    # Check if user is a trader
+    trader = await db.traders.find_one({"user_id": user["id"]})
+    if not trader:
+        raise HTTPException(status_code=403, detail="You must be a registered trader to create signals")
+    
+    signal_doc = {
+        "trader_id": str(trader["_id"]),
+        "symbol": req.symbol.upper(),
+        "action": req.action,
+        "entry_price": req.entryPrice,
+        "target_price": req.targetPrice,
+        "stop_loss": req.stopLoss,
+        "confidence": req.confidence,
+        "notes": req.notes,
+        "status": "active",
+        "created_at": datetime.now(timezone.utc)
+    }
+    result = await db.trade_signals.insert_one(signal_doc)
+    
+    # Update trader stats
+    await db.traders.update_one(
+        {"_id": trader["_id"]},
+        {"$inc": {"total_trades": 1}}
+    )
+    
+    signal_doc["id"] = str(result.inserted_id)
+    return {"success": True, "signal": signal_doc}
+
+@app.post("/api/copy-trading/copy/{traderId}")
+async def copy_trader(traderId: str, req: CopyTraderRequest, user = Depends(get_current_user)):
+    """Start copying a trader"""
+    from bson.errors import InvalidId
+    try:
+        trader_oid = ObjectId(traderId)
+    except InvalidId:
+        raise HTTPException(status_code=400, detail="Invalid trader ID")
+    
+    trader = await db.traders.find_one({"_id": trader_oid})
+    if not trader:
+        raise HTTPException(status_code=404, detail="Trader not found")
+    
+    # Check if already copying
+    existing = await db.copy_relationships.find_one({
+        "copier_id": user["id"],
+        "trader_id": traderId,
+        "status": "active"
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Already copying this trader")
+    
+    copy_doc = {
+        "copier_id": user["id"],
+        "trader_id": traderId,
+        "allocation": req.allocation,
+        "status": "active",
+        "total_copied_trades": 0,
+        "profit_loss": 0,
+        "created_at": datetime.now(timezone.utc)
+    }
+    await db.copy_relationships.insert_one(copy_doc)
+    
+    # Increment copiers count
+    await db.traders.update_one({"_id": trader_oid}, {"$inc": {"copiers": 1}})
+    
+    return {"success": True, "message": f"Now copying {trader.get('display_name', 'Trader')}"}
+
+@app.delete("/api/copy-trading/copy/{traderId}")
+async def stop_copying(traderId: str, user = Depends(get_current_user)):
+    """Stop copying a trader"""
+    result = await db.copy_relationships.update_one(
+        {"copier_id": user["id"], "trader_id": traderId, "status": "active"},
+        {"$set": {"status": "stopped", "stopped_at": datetime.now(timezone.utc)}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Not copying this trader")
+    
+    # Decrement copiers count
+    await db.traders.update_one({"_id": ObjectId(traderId)}, {"$inc": {"copiers": -1}})
+    
+    return {"success": True, "message": "Stopped copying trader"}
+
+@app.get("/api/copy-trading/my-copies")
+async def get_my_copies(user = Depends(get_current_user)):
+    """Get traders I'm copying"""
+    copies = await db.copy_relationships.find({
+        "copier_id": user["id"],
+        "status": "active"
+    }).to_list(50)
+    
+    result = []
+    for c in copies:
+        trader = await db.traders.find_one({"_id": ObjectId(c["trader_id"])})
+        if trader:
+            result.append({
+                "id": str(c["_id"]),
+                "traderId": c["trader_id"],
+                "traderName": trader.get("display_name", "Trader"),
+                "allocation": c.get("allocation", 0),
+                "profitLoss": c.get("profit_loss", 0),
+                "totalCopiedTrades": c.get("total_copied_trades", 0),
+                "createdAt": c["created_at"].isoformat() if isinstance(c.get("created_at"), datetime) else ""
+            })
+    
+    return {"copies": result}
+
+@app.get("/api/copy-trading/my-trader-profile")
+async def get_my_trader_profile(user = Depends(get_current_user)):
+    """Get my trader profile if I'm a trader"""
+    trader = await db.traders.find_one({"user_id": user["id"]})
+    if not trader:
+        return {"isTrader": False}
+    
+    trader["id"] = str(trader.pop("_id"))
+    trader["isTrader"] = True
+    if "user_id" in trader:
+        trader["userId"] = trader.pop("user_id")
+    if "display_name" in trader:
+        trader["displayName"] = trader.pop("display_name")
+    if "total_return" in trader:
+        trader["totalReturn"] = trader.pop("total_return")
+    if "win_rate" in trader:
+        trader["winRate"] = trader.pop("win_rate")
+    if "is_verified" in trader:
+        trader["isVerified"] = trader.pop("is_verified")
+    if "total_trades" in trader:
+        trader["totalTrades"] = trader.pop("total_trades")
+    if "winning_trades" in trader:
+        trader["winningTrades"] = trader.pop("winning_trades")
+    if "created_at" in trader:
+        trader["createdAt"] = trader.pop("created_at").isoformat() if isinstance(trader.get("created_at"), datetime) else ""
+    
+    return trader
+
+@app.put("/api/copy-trading/my-trader-profile")
+async def update_my_trader_profile(bio: str = "", user = Depends(get_current_user)):
+    """Update my trader profile"""
+    result = await db.traders.update_one(
+        {"user_id": user["id"]},
+        {"$set": {"bio": bio}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Not a registered trader")
+    return {"success": True}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

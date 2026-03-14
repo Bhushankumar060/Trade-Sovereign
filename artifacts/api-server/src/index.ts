@@ -1,12 +1,7 @@
 import app from "./app";
 
-const rawPort = process.env["PORT"];
-
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
+// Allow a default for local development; production platforms like Vercel will still provide PORT.
+const rawPort = process.env["PORT"] ?? "3000";
 
 const port = Number(rawPort);
 

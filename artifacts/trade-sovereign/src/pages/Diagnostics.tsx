@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle, XCircle, AlertTriangle, RefreshCw, ChevronDown, ChevronUp, Copy, ExternalLink, Zap, Database, Shield, Brain, CreditCard, Server } from "lucide-react";
 import { Button, Badge } from "@/components/ui/design-system";
-import { apiFetch } from "@/lib/fetch-interceptor";
+// fetch is automatically intercepted (Firebase auth token is injected) via src/lib/fetch-interceptor.ts
 import { cn } from "@/lib/utils";
 import { getAuth } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -201,7 +201,7 @@ export default function Diagnostics() {
   const { data, isLoading, refetch, dataUpdatedAt } = useQuery<DiagnosticsData>({
     queryKey: ["diagnostics"],
     queryFn: async () => {
-      const r = await apiFetch("/api/healthz/detailed");
+      const r = await fetch("/api/healthz/detailed");
       return r.json();
     },
     refetchInterval: 30000,

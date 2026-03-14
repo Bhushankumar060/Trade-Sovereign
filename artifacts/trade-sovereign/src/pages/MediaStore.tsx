@@ -9,10 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function MediaStore() {
   const [activeTab, setActiveTab] = useState<ListMediaType>(ListMediaType.music);
-  const { data, isLoading } = useListMedia({ query: { queryKey: ['/api/media', activeTab] }, request: undefined }); // Need to pass params properly via API setup, or just filter client side if not supported easily
-  
-  // Since we don't have direct access to alter query params properly in the generated hook call without knowing the exact object shape passed, 
-  // let's fetch all and filter, or use the param object if available. The generated hook takes `params?: ListMediaParams`
+
+  // Use the generated hook with params to filter by type
   const { data: mediaData, isLoading: mediaLoading } = useListMedia({ type: activeTab });
   
   const { addItem } = useCart();

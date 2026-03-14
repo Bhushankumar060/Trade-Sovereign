@@ -45,15 +45,15 @@ export default function Admin() {
   const [tab, setTab] = useState<Tab>("overview");
   const isAdmin = user?.role === "admin";
 
-  const { data: stats, refetch: refetchStats } = useAdminGetStats({ query: { enabled: isAdmin } });
-  const { data: analytics, refetch: refetchAnalytics } = useAdminGetAnalytics({ period: "30d" }, { query: { enabled: isAdmin && tab === "analytics" } });
-  const { data: productsData, refetch: refetchProducts } = useAdminListProducts({ query: { enabled: isAdmin } });
-  const { data: mediaData, refetch: refetchMedia } = useAdminListMedia({ query: { enabled: isAdmin } });
-  const { data: usersData, refetch: refetchUsers } = useAdminListUsers({ query: { enabled: isAdmin } });
-  const { data: catsData, refetch: refetchCats } = useAdminListCategories({ query: { enabled: isAdmin } });
-  const { data: pagesData, refetch: refetchPages } = useAdminListPages({ query: { enabled: isAdmin } });
-  const { data: aiSettings, refetch: refetchAi } = useAdminGetAiSettings({ query: { enabled: isAdmin } });
-  const { data: plansData, refetch: refetchPlans } = useAdminListSubscriptionPlans({ query: { enabled: isAdmin } });
+  const { data: stats, refetch: refetchStats } = useAdminGetStats({ query: { queryKey: ["admin-stats"], enabled: isAdmin } });
+  const { data: analytics, refetch: refetchAnalytics } = useAdminGetAnalytics({ period: "30d" }, { query: { queryKey: ["admin-analytics", "30d"], enabled: isAdmin && tab === "analytics" } });
+  const { data: productsData, refetch: refetchProducts } = useAdminListProducts({ query: { queryKey: ["admin-products"], enabled: isAdmin } });
+  const { data: mediaData, refetch: refetchMedia } = useAdminListMedia({ query: { queryKey: ["admin-media"], enabled: isAdmin } });
+  const { data: usersData, refetch: refetchUsers } = useAdminListUsers({ query: { queryKey: ["admin-users"], enabled: isAdmin } });
+  const { data: catsData, refetch: refetchCats } = useAdminListCategories({ query: { queryKey: ["admin-categories"], enabled: isAdmin } });
+  const { data: pagesData, refetch: refetchPages } = useAdminListPages({ query: { queryKey: ["admin-pages"], enabled: isAdmin } });
+  const { data: aiSettings, refetch: refetchAi } = useAdminGetAiSettings({ query: { queryKey: ["admin-ai-settings"], enabled: isAdmin } });
+  const { data: plansData, refetch: refetchPlans } = useAdminListSubscriptionPlans({ query: { queryKey: ["admin-subscription-plans"], enabled: isAdmin } });
 
   const createProduct = useAdminCreateProduct();
   const deleteProduct = useAdminDeleteProduct();

@@ -132,14 +132,14 @@ export function CartDrawer() {
                     <div key={item.id} className="flex gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
                       <div className="w-20 h-20 rounded-lg bg-black/40 overflow-hidden flex-shrink-0">
                         {detail.imageUrl ? (
-                          <img src={detail.imageUrl} alt={detail.name || (detail as any).title} className="w-full h-full object-cover" />
+                          <img src={detail.imageUrl} alt={"name" in detail ? detail.name : detail.title} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No img</div>
                         )}
                       </div>
                       <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <h4 className="font-medium text-sm line-clamp-2">{detail.name || (detail as any).title}</h4>
+                          <h4 className="font-medium text-sm line-clamp-2">{"name" in detail ? detail.name : detail.title}</h4>
                           <p className="text-primary font-semibold mt-1">{formatCurrency(detail.price)}</p>
                         </div>
                         <div className="flex items-center justify-between mt-2">

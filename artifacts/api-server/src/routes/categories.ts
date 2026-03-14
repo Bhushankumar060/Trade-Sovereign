@@ -36,7 +36,7 @@ router.get("/", async (_req: Request, res: Response): Promise<void> => {
 
 router.get("/:id", async (req: Request, res: Response): Promise<void> => {
   try {
-    const cats = await db.select().from(categoriesTable).where(eq(categoriesTable.id, req.params.id)).limit(1);
+    const cats = await db.select().from(categoriesTable).where(eq(categoriesTable.id, String(req.params.id))).limit(1);
     if (!cats[0]) { res.status(404).json({ error: "Not found", message: "Category not found" }); return; }
     res.json(await mapCategory(cats[0]));
   } catch (err) {
